@@ -1,0 +1,179 @@
+﻿@using ShareLoader.Classes;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ShareLoader</title>
+    <link rel="manifest" href="/manifest.json" />
+
+    <link rel="stylesheet" href="~/css/dataTable.css" />
+    <link rel="stylesheet" href="~/css/metro-all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+</head>
+<body>
+
+    <div class="app-bar-expand-md bg-darkTaupe fg-white" data-role="appbar">
+        <h3>ShareLoader</h3>
+
+        <ul class="app-bar-menu">
+            <li>
+                <a href="#">
+                    <span class="icon"><span class="mif-stop"></span></span>
+                    <span class="caption">Anhalten</span>
+                </a>
+            </li>
+            <li class="item-separator"></li>
+            <li class="item-header"><h4>Menü</h4></li>
+            <li>
+                <a asp-controller="Downloads" asp-action="Index">
+                    <span class="icon"><span class="mif-apps"></span></span>
+                    <span class="caption">Dashboard</span>
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Downloads" asp-action="List">
+                    <span class="icon"><span class="mif-list"></span></span>
+                    <span class="caption">Downloads</span>
+                </a>
+            </li>
+            <li>
+                <a href="#" onclick="startAddFile(); return false;">
+                    <span class="icon"><span class="mif-zoom-in"></span></span>
+                    <span class="caption">Hinzufügen</span>
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Settings" asp-action="Index">
+                    <span class="icon"><span class="mif-wrench"></span></span>
+                    <span class="caption">Einstellungen</span>
+                </a>
+            </li>
+            <li>
+                <a asp-controller="Downloads" asp-action="Impressum">
+                    <span class="icon"><span class="mif-widgets"></span></span>
+                    <span class="caption">Impressum</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    
+    
+
+    <div data-role="navview" data-compact="md" data-expanded="lg" data-toggle="#pane-toggle" class="navview compact-md expanded-lg @ViewHelper.MenuCompact(Context)" style="position: absolute !important; width:100%">
+        <nav class="navview-pane bg-taupe fg-white">
+            <button class="pull-button fg-white">
+                <span class="default-icon-menu"></span>
+            </button>
+            <ul class="navview-menu">
+                <li class="item-separator"></li>
+
+                <li class="item-header">ShareLoader</li>
+
+                <li>
+                    <a asp-controller="Downloads" asp-action="Exit">
+                        <span class="icon"><span class="mif-stop"></span></span>
+                        <span class="caption">Anhalten</span>
+                    </a>
+                </li>
+                <li class="item-separator"></li>
+                <li>
+                    <a asp-controller="Downloads" asp-action="Index">
+                        <span class="icon"><span class="mif-apps"></span></span>
+                        <span class="caption">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Downloads" asp-action="List">
+                        <span class="icon"><span class="mif-list"></span></span>
+                        <span class="caption">Downloads</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" onclick="startAddFile(); return false;">
+                        <span class="icon"><span class="mif-zoom-in"></span></span>
+                        <span class="caption">Hinzufügen</span>
+                    </a>
+                </li>
+                <li>
+                    <a asp-controller="Settings" asp-action="Index">
+                        <span class="icon"><span class="mif-wrench"></span></span>
+                        <span class="caption">Einstellungen</span>
+                    </a>
+                </li>
+                @*<li>
+            <a asp-controller="Downloads" asp-action="Impressum">
+                <span class="icon"><span class="mif-widgets"></span></span>
+                <span class="caption">Impressum</span>
+            </a>
+        </li>*@
+            </ul>
+        </nav>
+
+        <div class="navview-content pl-4-md pr-4-md">
+            @RenderBody()
+        </div>
+    </div>
+
+    <form asp-controller="Downloads" asp-action="AddDlc" id="FormAddFile" method="post" enctype="multipart/form-data" style="display:none">
+        <input name="Name" type="text" value="Test" />
+        <input name="Password" type="text" value="1234" />
+        <input name="Dlc" type="file" id="InputAddFile" onchange="changedAddFile()" accept="*.dlc" />
+    </form>
+
+
+    <script>
+        function startAddFile() {
+            $("#InputAddFile").click();
+        }
+
+        function changedAddFile() {
+            $("#FormAddFile").submit();
+        }
+    </script>
+
+
+
+
+    <environment include="Development">
+        <script src="~/js/site.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="~/js/site.min.js" asp-append-version="true"></script>
+    </environment>
+
+    <script src="~/js/jquery.cookie.js"></script>
+    <script src="~/js/dataTable.js"></script>
+    <script src="~/js/metro.min.js"></script>
+
+
+    <script>
+        $(".pull-button").click(() => {
+            setTimeout(checkMenu, 500);
+        });
+
+        function checkMenu() {
+            console.log("gespeichert: " + $(".navview").hasClass("compacted"));
+            $.cookie("menuIsCompact", $(".navview").hasClass("compacted"));
+        }
+
+
+        //if (navigator.serviceWorker.controller) {
+        //    console.log('[PWA Builder] active service worker found, no need to register')
+        //} else {
+
+        //    //Register the ServiceWorker
+        //    navigator.serviceWorker.register('/sw.js', {
+        //        scope: './'
+        //    }).then(function (reg) {
+        //        console.log('Service worker has been registered for scope:' + reg.scope);
+        //    });
+        //}
+    </script>
+
+    @RenderSection("Scripts", required: false)
+    </body>
+</html>

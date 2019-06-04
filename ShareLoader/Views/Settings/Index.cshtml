@@ -1,0 +1,92 @@
+﻿@model ShareLoader.Classes.DownloadSettings
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("_Menu.cshtml")
+
+<h1>Allgemein</h1>
+
+<form asp-action="Index" data-role="validator" method="post" enctype="multipart/form-data">
+    <div class="form-container">
+        <h3>Pfade ändern</h3>
+        <hr />
+
+        <div class="form-group">
+            <label asp-for="DownloadFolder"></label>
+            <input asp-for="DownloadFolder" data-validate="required" />
+            <small class="text-muted">In diesem Ordner werden die Ordner zum herunterladen erstellt.</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="MoveFolder"></label>
+            <input asp-for="MoveFolder" data-validate="required" />
+            <small class="text-muted">In diesen Ordner werden die Dateien verschoben nach dem entpacken.</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="LogFolder"></label>
+            <input asp-for="LogFolder" data-validate="required" />
+            <small class="text-muted">In diesem Ordner werden die Logs erstellt.</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="ZipPath"></label>
+            <input asp-for="ZipPath" data-validate="required" />
+            <small class="text-muted">Pfad zum Programm für das entpacken. (C:\programs\7z.exe)</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="ZipArgs"></label>
+            <input asp-for="ZipArgs" />
+            <small class="text-muted">Argumente für das Entpacken. (-e -pw password)</small>
+            <small class="text-muted">%filesDir%  -  %extractDir%  -  %pass%</small>
+        </div>
+
+
+        <div class="form-group">
+            <label asp-for="IntervalDownload"></label>
+            <input asp-for="IntervalDownload" />
+            <small class="text-muted">Downloads alle x Sekunden suchen.</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="IntervalExtract"></label>
+            @if (Model.ExtractImmedialy)
+            {
+                <input asp-for="IntervalExtract" disabled />
+            }
+            else
+            {
+                <input asp-for="IntervalExtract" />
+            }
+            <small class="text-muted">Dateien zum Entpacken alle x Sekunden suchen.</small>
+            <small class="text-muted">Nur wenn nicht "Sofort entpacken" aktiviert.</small>
+        </div>
+        <div class="form-group">
+            <label asp-for="IntervalMove"></label>
+            @if (Model.MoveImmedialy)
+            {
+                <input asp-for="IntervalMove" disabled />
+            }
+            else
+            {
+                <input asp-for="IntervalMove" />
+            }
+            <small class="text-muted">Dateien zum Verschieben alle x Sekunden suchen.</small>
+            <small class="text-muted">Nur wenn nicht "Sofort verschieben" aktiviert.</small>
+        </div>
+
+        <div class="form-group">
+            <input asp-for="ExtractImmedialy" class="checkbox" data-role="checkbox" />
+            <label asp-for="ExtractImmedialy"></label>
+            <small style="display:block" class="text-muted">Sollen Downloads direkt nach dem alle Gruppenparts heruntergeladen wurden entpackt werden?</small>
+        </div>
+        <div class="form-group">
+            <input asp-for="MoveImmedialy" class="checkbox" data-role="checkbox" />
+            <label asp-for="MoveImmedialy"></label>
+            <small style="display:block" class="text-muted">Sollen Downloads direkt nach dem entpacken verschoben werden?</small>
+        </div>
+
+        <div class="form-group">
+            <button class="button success">Speichern</button>
+        </div>
+    </div>
+</form>

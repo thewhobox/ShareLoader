@@ -1,0 +1,37 @@
+﻿@model ErrorViewModel
+
+@{
+    ViewData["Title"] = "Errors";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <a asp-controller="Downloads" asp-action="Show" asp-route-id="@Model.Group.ID"><button class="button"><span class="mif-arrow-left"></span> Zurück</button></a>
+</div>
+
+<h2>Fehler</h2>
+<h3>@Model.Group.Name</h3>
+
+<table class="dataTable">
+    <thead>
+        <tr>
+            <th>Datum</th>
+            <th>SourceId</th>
+            <th>Nachricht</th>
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (DownloadError item in Model.Errors)
+        {
+        <tr>
+            <td>@item.Time</td>
+            <td>@item.SourceId</td>
+            <td>@item.Message</td>
+        </tr>
+        }
+
+        </tbody>
+    </table>
+

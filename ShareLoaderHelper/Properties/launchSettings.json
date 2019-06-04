@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "ShareLoaderHelper": {
+      "commandName": "Project",
+      "commandLineArgs": "--console"
+    }
+  }
+}

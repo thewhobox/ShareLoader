@@ -1,0 +1,15 @@
+﻿@model StatisticShowModel
+
+
+<canvas id="@Model.id" style="width: @Model.width ; height: @Model.height "></canvas>
+
+<script src="~/js/Chart.js"></script>
+
+<script>
+    var ctx = document.getElementById("@Model.id");
+    if (window.config == null)
+        window.config = [];
+    window.config["@Model.id"] = @Html.Raw(Model.GetJson()) 
+
+    window.@Model.id = new Chart(ctx, window.config["@Model.id"]);
+</script>

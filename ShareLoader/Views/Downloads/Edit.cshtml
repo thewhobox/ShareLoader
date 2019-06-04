@@ -1,0 +1,359 @@
+﻿@model ShareLoader.Models.DownloadGroup
+
+@{
+    ViewData["Title"] = "Bearbeiten";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #searchResults img {
+        border: 3px solid transparent;
+        font-size: 13px;
+        float: left;
+        width: 113px;
+        height: 180px;
+    }
+
+    #searchResults img.selected {
+        border: 3px solid green;
+        box-shadow: none !important;
+    }
+
+    .form-container table {
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .form-container input {
+        width: 100%;
+    }
+
+    .form-container tr.input td {
+        width: 50%;
+    }
+</style>
+
+
+<ul class="h-menu bg-blue fg-white" data-role="ripple" data-ripple-target="li">
+    <li><a asp-action="Show" asp-route-id="@Model.ID"><span class="mif-arrow-left"></span> Zurück</a></li>
+</ul>
+
+
+<div class="grid">
+    <div class="row">
+        <div class="cell">
+            <form asp-action="Edit" data-role="validator" method="post">
+                <input type="hidden" name="IsTemp" value="false" />
+                <input type="hidden" name="Name" value="@Model.Name" />
+
+                <div class="form-container" style="height: 100%">
+
+                    <h4>Gruppe bearbeiten</h4>
+                    <hr />
+
+                    <div class="form-group">
+                        <label asp-for="Name" class="control-label"></label>
+                        <input asp-for="Name" class="form-control" disabled />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password" class="control-label"></label>
+                        <input asp-for="Password" autocomplete="off" class="form-control" />
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Sort" class="control-label"></label>
+                        <input asp-for="Sort" class="form-control" />
+                        <span asp-validation-for="Sort" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Type"></label>
+                        <select asp-for="Type" asp-items="Html.GetEnumSelectList<DownloadType>()" data-validate="required not=0"></select>
+                        <span class="invalid_feedback">
+                            Bitte wähle einen Typ aus.
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Target"></label>
+                        <select asp-for="Target" asp-items="Html.GetEnumSelectList<DownloadTarget>()" data-validate="required"></select>
+                        <span class="invalid_feedback">
+                            Bitte wähle einen Typ aus.
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <input type="submit" value="Speichern" class="button success" />
+                    </div>
+
+                </div>
+            </form>
+        </div>
+
+
+        @if (Model.IsTemp)
+        {
+
+            <div class="cell">
+                <div class="form-container" style="height: 100%">
+                    <h2>Sortieren</h2>
+                    <hr />
+
+                    <div id="searchBar" style="visibility:hidden" data-role="progress" data-type="line" data-small="true"></div>
+
+                    <div class="form-group">
+                        <input id="inSearch" type="text" placeholder="Suche nach der Serie/Film" value="@ViewData["searchString"]" disabled="disabled" autocomplete="off" />
+                        <small class="text-muted">Suchtext oder Imdb-ID</small>
+                    </div>
+
+
+                    <div id="searchResults">
+
+                    </div>
+
+                    <div style="clear:both;">
+                        <a href="javascript:searchBack()" class="button">Zurück</a>
+                        <span id="currentPage">0</span> / <span id="totalPage">1</span>
+                        <a href="javascript:searchNext()" class="button">Weiter</a>
+                    </div>
+
+                    <div class="form-group" id="inSeasonD" style="clear:both;display:none">
+                        <select id="inSeason" disabled="disabled"></select>
+                    </div>
+
+                </div>
+            </div>
+
+
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let stype = "";
+        let season = 0;
+        let imdbid = "";
+        let currentPage = 1;
+        let totalPage = 0;
+
+        $(document).ready(function () {
+            checkSearch();
+            checkSeason();
+        });
+
+        $(".card-header input[type=checkbox]").change(function () {
+            let isChecked = $(".card-header input[type=checkbox]").prop("checked");
+            let group = $(this).attr("data-group");
+
+            if (isChecked)
+                $(".card[data-group=" + group + "] .card-footer input").attr("checked", "checked");
+            else
+                $(".card[data-group=" + group + "] .card-footer input").removeAttr("checked");
+        });
+
+        $("#inSearch").keyup(function () {
+            let query = $("#inSearch").val();
+            let patt = new RegExp("tt([0-9]{3,7})+");
+            let res = patt.test(query);
+
+            if (res) {
+                imdbid = query;
+                getSeasons(query, true);
+            } else {
+                imdbid = "";
+                currentPage = 1;
+                search();
+                $("input[name=nameToSort]").attr("value", query.replace(" ", "."));
+            }
+        });
+
+        $("#inSeason").change(function () {
+            if ($("#inSeason").val() != "select")
+                setName();
+            else
+                setname("none");
+        });
+
+        $("#Type").change(function () {
+            setName("none");
+            checkSearch();
+        });
+
+        function checkSeason() {
+            let query = $("#Name").val();
+            let patt = new RegExp("S([0-9]{1,2})+");
+            let res = patt.exec(query);
+
+            if (res == null)
+                return;
+
+            season = res[1];
+        }
+
+        function checkSearch() {
+            $("#inSeason").html("");
+            switch ($("#Type").val()) {
+                case "1":
+                    stype = "movie";
+                    $("#inSearch").removeAttr('disabled');
+                    $("#inSeasonD").css("display", "none");
+                    $("#nameToSort").removeAttr('disabled');
+                    $("#nameToSort").attr('data-validate', 'required');
+                    break;
+                case "2":
+                    stype = "series";
+                    $("#inSearch").removeAttr('disabled');
+                    $("#inSeasonD").css("display", "block");
+                    $("#nameToSort").removeAttr('disabled');
+                    $("#nameToSort").attr('data-validate', 'required');
+                    break;
+                case "3":
+                    stype = "";
+                    $("#inSearch").attr('disabled', 'disabled');
+                    $("#inSeasonD").css("display", "none");
+                    $("#nameToSort").attr('disabled', 'disabled');
+                    $("#nameToSort").removeAttr('data-validate');
+                    break;
+                default:
+                    $("#inSearch").attr('disabled', 'disabled');
+                    $("#inSeasonD").css("display", "none");
+                    $("#nameToSort").attr('disabled', 'disabled');
+                    $("#nameToSort").removeAttr('data-validate');
+                    break;
+            }
+            currentPage = 1;
+            search();
+        }
+
+        function searchBack() {
+            if (currentPage == 1)
+                return;
+
+            currentPage -= 1;
+            search();
+        }
+
+        function searchNext() {
+            currentPage += 1;
+            search();
+        }
+
+        function search() {
+            $("#currentPage").html(currentPage);
+            $("#searchBar").css("visibility", "visible");
+            let query = $("#inSearch").val();
+            $.getJSON("https://www.omdbapi.com/?apikey=e4e995ba&s=" + query + "&type=" + stype + "&page=" + currentPage, function (data) {
+                console.log(data);
+                $("#searchResults").html("");
+                if (data.Response == "False") {
+                    $("#searchResults").html(data.Error);
+                    $("#searchBar").css("visibility", "hidden");
+                    return;
+                }
+
+                totalPage = Math.ceil(data.totalResults / 10);
+                $("#totalPage").html(totalPage);
+
+                for (i = 0; i < data.Search.length; i++) {
+                    var item = data.Search[i];
+                    let poster = item.Poster;
+                    if (poster == "N/A")
+                        poster = "http://www.citypages.com/img/movie-placeholder.gif";
+                    $("#searchResults").append('<img onerror="javascript:imgFail(this);" title="' + item.Title + '" alt="' + item.Title + '" src="' + poster + '" data-imdbid="' + item.imdbID + '" data-sort="' + item.Title + '" data-year="' + item.Year + '">');
+                }
+                addClick();
+                $("#searchBar").css("visibility", "hidden");
+            });
+        }
+
+        function imgFail(ele) {
+            $(ele).attr("src", "http://www.citypages.com/img/movie-placeholder.gif");
+        }
+
+        function addClick() {
+            $("#searchResults img").click(function () {
+                $("#searchResults img").removeClass("selected");
+                var t = $(this);
+                t.addClass("selected")
+                imdbid = t.attr("data-imdbid");
+
+                if ($("#Type").val() == "2") {
+                    getSeasons(t.attr("data-imdbid"));
+                    setName("none");
+                } else {
+                    setName(t.attr("data-sort"), t.attr("data-year"));
+                }
+            });
+        }
+
+        function getSeasons(imdbid, addName = false) {
+            $.getJSON("https://www.omdbapi.com/?apikey=e4e995ba&i=" + imdbid, function (data) {
+                if (data.Response == "False") {
+                    alert("Imdb ID nicht gefunden");
+                    setName("none");
+                    return;
+                }
+
+                if (addName) {
+                    setName(data.Title, data.Year);
+                    $("#serachResults").html(data.Title);
+                }
+
+                $("#inSeason").html("");
+                $("#inSeason").append("<option value=\"select\">Bitte Staffel auswählen</option>");
+                $("#inSeason").append("<option value=\"dynamisch\">Staffelpaket</option>");
+                for (let i = 1; i <= data.totalSeasons; i++) {
+                    let iteration = i;
+                    if (iteration < 10)
+                        iteration = "0" + i;
+                    if (iteration == season) {
+                        $("#inSeason").append("<option value=\"" + iteration + "\" selected>Staffel " + iteration + "</option>");
+                        setName();
+                    }
+                    else
+                        $("#inSeason").append("<option value=\"" + iteration + "\">Staffel " + iteration + "</option>");
+                }
+
+                $("#inSeason").prop("disabled", false);
+            });
+        }
+
+        function setName(name = "", year = 0) {
+            if (name == "none") {
+                $("input[name=Sort]").attr("value", "");
+                return;
+            }
+
+            let sort = name;
+            console.log(sort);
+            if (sort == "")
+                sort = $("#searchResults img.selected").attr("data-sort");
+            console.log(sort);
+
+            if ($("#Type").val() == "2") {
+                sort = sort + "/" + "Staffel " + $("#inSeason").val();
+            } else {
+                if (year == 0)
+                    sort = sort + " " + $("#searchResults img.selected").attr("data-year");
+                else
+                    sort = sort + "(" + year + ")";
+
+                if (imdbid != "")
+                    sort = sort + "[imdbid=" + imdbid + "]";
+
+                console.log("id: " + imdbid);
+
+                while (sort.indexOf(" ") != -1) {
+                    sort = sort.replace(" ", ".");
+                }
+            }
+
+
+
+            $("input[name=Sort]").attr("value", sort);
+        }
+    </script>
+
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

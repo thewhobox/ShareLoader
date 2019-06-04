@@ -1,0 +1,66 @@
+﻿@model IEnumerable<ShareLoader.Models.AccountModel>
+
+@{
+    ViewData["Title"] = "Accounts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("_Menu.cshtml")
+
+<h1>Accounts</h1>
+
+
+
+<p>
+    <a asp-action="AccountCreate" class="button">Create New</a>
+</p>
+
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                &nbsp;
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Username)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrafficLeft)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TrafficLeftWeek)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ValidTill)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.IsPremium)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Username)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrafficLeft) GB
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.TrafficLeftWeek) GB
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ValidTill)
+            </td>
+            <td>
+                <a asp-action="AccountEdit" asp-route-id="@item.ID">Edit</a> |
+                <a asp-action="AccountDelete" asp-route-id="@item.ID">Delete</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

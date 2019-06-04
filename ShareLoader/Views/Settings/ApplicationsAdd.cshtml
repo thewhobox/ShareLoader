@@ -1,0 +1,31 @@
+﻿@model ShareLoader.Models.AppHash
+
+@{
+    ViewData["Title"] = "ApplicationsAdd";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>ApplicationsAdd</h2>
+
+
+    <div class="form-container" style="width:600px; margin:0 auto">
+        <h2>Code hinzufügen</h2>
+        <hr />
+
+        <div class="form-group">
+            <label style="display: block">Id:</label>
+            <span style="display: block">@Model.Id</span>
+            <small class="text-muted">Gib die Id in deine App ein.</small>
+        </div>
+
+        <div class="form-group">
+            <label style="display: block">Secret</label>
+            <span style="display: block">@Model.Secret</span>
+            <small class="text-muted">Gib das Secret in deine App ein.</small>
+        </div>
+
+        <div class="form-group">
+            <a asp-action="Applications"><input type="button" class="button" value="Zurück"></a>
+            <a asp-action="ApplicationsDelete" asp-route-id="@Model.Id"><input type="button" class="button error" value="Abbrechen"></a>
+        </div>
+    </div>

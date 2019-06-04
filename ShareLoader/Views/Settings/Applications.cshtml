@@ -1,0 +1,40 @@
+﻿@model IEnumerable<ShareLoader.Models.AppHash>
+
+@{
+    ViewData["Title"] = "App";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@await Html.PartialAsync("_Menu.cshtml")
+
+<h2>App</h2>
+
+<p>
+    <a asp-action="ApplicationsAdd">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Secret)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Count() > 0)
+        {
+@foreach (var item in Model)
+{
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Secret)
+            </td>
+            <td>
+                <a asp-action="ApplicationsDelete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+}
+        }
+    </tbody>
+</table>

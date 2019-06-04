@@ -1,0 +1,178 @@
+﻿@model Dictionary<string, StatisticShowModel>
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<ul class="h-menu bg-blue fg-white" data-role="ripple" data-ripple-target="li">
+    <li><a asp-controller="Settings" asp-action="Accounts"><span class="mif-users"></span> Accounts</a></li>
+    <li><a asp-action="Delete"><span class="mif-file-download"></span> Aktueller Download</a></li>
+</ul>
+
+<h1>Dashboard</h1>
+
+<style>
+    td {
+        padding: 0 5px;
+    }
+</style>
+
+<div class="grid">
+    <div class="row">
+        <div class="cell" style="border-right: 1px lightgray solid">
+            <div>
+                <p style="text-align:center">Aktueller Download</p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Gruppe:</td>
+                            <td><span data-id="statInfoGroup">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>Fortschritt:</td>
+                            <td><span data-id="statInfoPerc">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>Datei:</td>
+                            <td><span data-id="statInfoFile">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>Geschwindigkei:</td>
+                            <td><span data-id="statInfoSpeed">-</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <p style="text-align:center">Aktuelles Entpacken</p>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>Gruppe:</td>
+                            <td><span data-id="statExtractGroup">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>Fortschritt:</td>
+                            <td><span data-id="statExtractPerc">-</span></td>
+                        </tr>
+                        <tr>
+                            <td>Datei:</td>
+                            <td><span data-id="statExtractFile">-</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="cell">
+            <div>
+                <p style="text-align:center">Neueste Fehlermeldungen</p>
+                Keine
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="cell" style="border-right: 1px lightgray solid">
+
+            <div>
+                <p style="text-align:center">Aktuelle Geschwindigkeit</p>
+                @await Html.PartialAsync("_StatisticDiagram", Model["download"])
+            </div>
+        </div>
+
+        <div class="cell">
+            <div>
+                <p style="text-align:center">Account Traffic</p>
+                @await Html.PartialAsync("_StatisticDiagram", Model["accounts"])
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        let lastInfoItemId = "";
+        let lastExtractItemId = "";
+        $().ready(function () {
+            websocket = null;
+            connect();
+        });
+
+        function connect() {
+            window.idToIndex = @Html.Raw(ViewData["idToIndex"]) ;
+
+            var url = "";
+
+            if (window.location.href.indexOf("https") != -1)
+                url = "wss" + window.location.href.substring(5);
+            else
+                url = "ws" + window.location.href.substring(4);
+
+            webSocket = new WebSocket(url); //"wss://share.mikegerst.de/", "chat");
+
+            webSocket.onopen = function () {
+                console.log("connected");
+                webSocket.send("register;-1;-1;downinfo.accountinfo");
+                console.log("sent register");
+            };
+
+
+            webSocket.onmessage = function (evt) {
+                var resp;
+                try {
+                    resp = JSON.parse(evt.data);
+                } catch (err) {
+                    console.log(evt);
+                    console.log(evt.data);
+                    console.log(err);
+                    return;
+                }
+                
+
+                switch (resp.type) {
+                    case "info":
+                        if (resp.id != lastInfoItemId) {
+                            lastInfoItemId = resp.id;
+                            $.get('@Url.Action("apiGetNewItem")' + '?id=' + resp.id, function (data) {
+                                $("[data-id=statInfoGroup]").html(data.group);
+                                $("[data-id=statInfoFile]").html(data.file);
+                            });
+                        }
+                        $("[data-id=statInfoSpeed]").html(resp.speed);
+                        $("[data-id=statInfoPerc]").html(resp.perc + " %");
+                        if (window.config["@Model["download"].id"].data.labels.length > 1)
+                            window.config["@Model["download"].id"].data.labels[window.config["@Model["download"].id"].data.labels.length - 1] = "";
+                        window.config["@Model["download"].id"].data.labels.push(resp.stamp);
+                        window.config["@Model["download"].id"].data.datasets[0].data.push(resp.average);
+                        if (window.config["@Model["download"].id"].data.datasets[0].data.length > 50) {
+                            window.config["@Model["download"].id"].data.datasets[0].data.shift();
+                            window.config["@Model["download"].id"].data.labels.shift();
+                        }
+                        var x = window.@Html.Raw(@Model["download"].id) ;
+                        x.update();
+                        break;
+
+                    case "extract":
+                        if (resp.id != lastExtractItemId) {
+                            lastExtractItemId = resp.id;
+                            $.get('@Url.Action("apiGetNewItem")' + '?id=' + resp.id, function (data) {
+                                $("[data-id=statExtractGroup]").html(data.group);
+                                $("[data-id=statExtractFile]").html(data.file);
+                            });
+                        }
+                        $("[data-id=statExtractPerc]").html(data.perc);
+                        break;
+
+
+                    case "trafficday":
+                        window.config["@Model["accounts"].id"].data.datasets[window.idToIndex[resp.id]].data[0] = parseInt(resp.value);
+                        var x = window.@Html.Raw(@Model["accounts"].id) ;
+                        x.update();
+                        break;
+                }
+            };
+
+        }
+    </script>
+}

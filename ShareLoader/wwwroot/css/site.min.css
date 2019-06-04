@@ -1,0 +1,15 @@
+table tr td div.button-hover {
+    display: none;
+}
+
+table tr:hover td div.button-hover {
+    display: block;
+}
+
+table tr:hover td div.button-default {
+    display: none;
+}
+
+table tr.finished {
+    display: none;
+}
