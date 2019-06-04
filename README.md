@@ -1,12 +1,6 @@
 # Einführung 
-TODO: Geben Sie eine kurze Einführung in Ihr Projekt. In diesem Abschnitt erklären Sie die Ziele oder die Motivation hinter diesem Projekt. 
+ShareLoader ist ein einfacher DOwnloader für One-Click-Hoster wie Share-Online.biz
+Filme oder Serien könenn dabei einfach auf Imdb gesucht und so richtig getaggt werden.
+(Für Software wie Emby oder Plex)
 
-# Erste Schritte
-TODO: Leiten Sie die Benutzer durch die Inbetriebnahme Ihres Codes auf deren Systemen. In diesem Abschnitt können Sie folgende Themen behandeln:
-1.	Startup:
-            services.AddSingleton<AlexaSkillHandler.Models.AlexaHandler>(new AlexaSkillHandler.Models.AlexaHandler());
-            services.AddSingleton<MusicService>(new MusicService());
-            
-            app.UseAlexaHandler(typeof(Controllers.AlexaController)); //Controller der für Alexa benutzt werden soll
-2.	Controller mit Injection "AlexaHandler handler" benutzen
-3.	Return SkillResponse
+Die heruntergeladenen Datein werden automatisch entpackt und in das entsprechende Verzeichnis verschoben.
