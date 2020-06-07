@@ -35,7 +35,7 @@ namespace ShareLoader.Models
         public States State { get; set; } = States.Waiting;
         [MaxLength(32)]
         public string MD5 { get; set; }
-        [MaxLength(2)]
+        [MaxLength(3)]
         public string Hoster { get; set; }
 
         private int _perc = 0;

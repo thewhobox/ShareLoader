@@ -27,7 +27,8 @@ namespace ShareLoader.Data
         public DownloadContext CreateDbContext(string[] args)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DownloadContext>();
-            optionsBuilder.UseMySql("server=mikegerst.de;userid=admin;password=Mein#pw#mysqladmin;database=shareloader;");
+            //optionsBuilder.UseMySql("server=mikegerst.de;userid=shareloader;password=Mein#pw#shareloader;database=shareloader;");
+            optionsBuilder.UseMySql($"server=mikegerst.de;userid=shareloader;password=Mein#pw#shareloader;database=shareloader;connectiontimeout=30");
 
             return new DownloadContext(optionsBuilder.Options);
         }
