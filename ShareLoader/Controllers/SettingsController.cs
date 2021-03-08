@@ -44,7 +44,7 @@ namespace ShareLoader.Controllers
         [Route("/Settings/Account/Create")]
         public IActionResult AccountCreate()
         {
-            ViewData["hoster"] = DownloadHelper.GetAllHoster();
+            ViewData["hoster"] = DownloadHelper.GetAllHosterNames();
             return View();
         }
 

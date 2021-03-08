@@ -13,6 +13,7 @@ namespace ShareLoader.Downloader
         bool IsFree { get; }
         string Identifier { get; }
         string UrlIdentifier { get; }
+        bool AllowClientRedirect { get; }
 
         string GetItemId(string url);
 

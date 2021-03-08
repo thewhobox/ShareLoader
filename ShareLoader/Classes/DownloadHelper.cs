@@ -32,6 +32,27 @@ namespace ShareLoader.Classes
             return temp;
         }
 
+        public static List<string> GetAllHosterNames(bool? onlyFree = null)
+        {
+            List<string> temp = new List<string>();
+            var q = from t in Assembly.GetExecutingAssembly().GetTypes()
+                    where t.IsClass && t.IsNested == false && t.Namespace == "ShareLoader.Downloader"
+                    select t;
+
+            foreach (Type t in q.ToList())
+            {
+                IDownloader down = (IDownloader)Activator.CreateInstance(t);
+
+
+                if (onlyFree != null && down.IsFree != onlyFree)
+                    continue;
+
+                temp.Add(down.UrlIdentifier);
+            }
+
+            return temp;
+        }
+
         public static IDownloader GetDownloader(DownloadItem item)
         {
             IDownloader downloader = null;
@@ -58,7 +79,7 @@ namespace ShareLoader.Classes
             IDownloader downloader = null;
 
             var q = from t in Assembly.GetExecutingAssembly().GetTypes()
-                    where t.IsClass && t.Namespace == "ShareLoader.Downloader"
+                    where t.IsClass && t.Namespace == "ShareLoader.Downloader" && !t.FullName.Contains("+")
                     select t;
 
             foreach(Type t in q.ToList())

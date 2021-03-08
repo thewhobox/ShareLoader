@@ -244,9 +244,18 @@ namespace ShareLoader.Controllers
             }
 
             group = DownloadHelper.SortGroups(group);
-
             _context.Groups.Add(group);
             _context.SaveChanges();
+
+
+            foreach(DownloadItem item in group.Items)
+            {
+                item.DownloadGroupID = group.ID;
+                _context.Items.Add(item);
+            }
+            _context.SaveChanges();
+
+
             return RedirectToAction("Show", new { id = group.ID });
         }
 

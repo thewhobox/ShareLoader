@@ -17,6 +17,7 @@ namespace ShareLoader.Downloader
         public bool IsFree { get; } = true;
         public string Identifier { get; } = "zs";
         public string UrlIdentifier { get; } = "zippyshare.com";
+        public bool AllowClientRedirect { get; } = true;
 
         public Task<AccountProfile> DoLogin(AccountProfile profile)
         {

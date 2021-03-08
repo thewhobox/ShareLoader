@@ -20,7 +20,8 @@ namespace ShareLoader.Models
         public bool IsPremium { get; set; }
         public DateTime ValidTill { get; set; }
         public float Credit { get; set; }
-        [MaxLength(2)]
+        [MaxLength(3)]
         public string Hoster { get; set; }
+        public bool AllowClientRedirect { get; set; } = true;
     }
 }

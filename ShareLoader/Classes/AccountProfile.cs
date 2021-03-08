@@ -11,12 +11,16 @@ namespace ShareLoader.Classes
     {
         public HttpClient Client { get; set; }
         public AccountModel Model { get; set; }
+        public HttpClientHandler Handler { get; set; }
 
         public AccountProfile(AccountModel m)
         {
             Model = m;
-            
-            Client = new HttpClient();
+
+            Handler = new HttpClientHandler();
+            Handler.AllowAutoRedirect = false;
+
+            Client = new HttpClient(Handler);
         }
     }
 }

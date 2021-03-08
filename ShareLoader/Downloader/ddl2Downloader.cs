@@ -11,12 +11,12 @@ using ShareLoader.Models;
 
 namespace ShareLoader.Downloader
 {
-    public class ddlDownloader : IDownloader
+    public class ddl2Downloader : IDownloader
     {
         HttpClient clientPublic = new HttpClient();
         public bool IsFree { get; } = false;
         public string Identifier { get; } = "ddl";
-        public string UrlIdentifier { get; } = "ddownload.com";
+        public string UrlIdentifier { get; } = "ddl.to";
         public bool AllowClientRedirect { get; } = false;
 
 
@@ -72,16 +72,14 @@ namespace ShareLoader.Downloader
             paras.Add("op", "login");
             paras.Add("rand", "");
             paras.Add("redirect", "https://ddownload.com/");
-            paras.Add("token", m.Groups[0].Value);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("pass", profile.Model.Password);
+            paras.Add("token", m.Groups[1].Value);
+            paras.Add("login", profile.Model.Username);
+            paras.Add("password", profile.Model.Password);
 
             try
             {
                 HttpResponseMessage resp = await profile.Client.PostAsync("https://ddownload.com/", new FormUrlEncodedContent(paras));
+                string x = await resp.Content.ReadAsStringAsync();
             }
             catch (Exception)
             {
@@ -113,21 +111,20 @@ namespace ShareLoader.Downloader
             }
 
             profile.Model.IsPremium = true;
-            Regex reg = new Regex("<div class=\"price\"><sup>$</sup>([0-9]*)0</div>");
+            Regex reg = new Regex("<div class=\"price\"><sup>\\$</sup>([0-9]+)</div>");
             float guthaben = float.Parse(reg.Match(profileStr).Groups[1].Value.Trim().Replace('.', ','));
             profile.Model.Credit = guthaben;
 
             if (profile.Model.IsPremium)
             {
-                reg = new Regex("Premium Account (bis ([0-9]{1,2} [a-zA-Z]* [0-9]{4}))");
+                //"Premium Account (expires 6 July 2020)" >
+                reg = new Regex("Premium Account \\(expires ([0-9]{1,2} [a-zA-Z]* [0-9]{4})\\)");
                 string validdate = reg.Match(profileStr).Groups[1].Value.Trim();
                 profile.Model.ValidTill = DateTime.Parse(validdate);
 
-                reg = new Regex("1 Tag: <img src='(.*)' alt='' width='16' height='16' title='([0-9]*)% verfügbar \\((.*) GiB\\)");
-                float traffic1 = float.Parse(reg.Match(profileStr).Groups[3].Value.Trim().Replace('.', ','));
-
-                reg = new Regex("7 Tage: <img src='(.*)' alt='' width='16' height='16' title='([0-9]*)% verfügbar \\((.*) GiB\\)");
-                float traffic7 = float.Parse(reg.Match(profileStr).Groups[3].Value.Trim().Replace('.', ','));
+                reg = new Regex("<div class=\"price\"><sup>MB</sup>([0-9]+)</div>");
+                float traffic1 = float.Parse(reg.Match(profileStr).Groups[1].Value.Trim().Replace('.', ',')) / 1024;
+                float traffic7 = 700 - traffic1;
 
                 profile.Model.TrafficLeft = traffic1;
                 profile.Model.TrafficLeftWeek = traffic7;
@@ -142,17 +139,20 @@ namespace ShareLoader.Downloader
 
         public async Task<Stream> GetDownloadStream(DownloadItem item, AccountProfile profile)
         {
-            string content = await profile.Client.GetStringAsync("http://www.share-online.biz/dl/" + item.ShareId);
-            Regex reg = new Regex("var dl=\"(.*)\";var file");
-            Match m = reg.Match(content);
+            string content = await profile.Client.GetStringAsync("https://ddownload.com/" + item.ShareId);
 
-            if (!m.Success)
-                throw new NoDownloadException();
+            Dictionary<string, string> paras = new Dictionary<string, string>();
+            paras.Add("op", "download2");
+            paras.Add("id", item.ShareId);
+            paras.Add("rand", "");
+            paras.Add("referer", "");
+            paras.Add("method_free", "");
+            paras.Add("method_premium", "1");
+            paras.Add("adblock_detected", "0");
 
-            var encodedBytes = System.Convert.FromBase64String(m.Groups[1].Value);
-            string url = System.Text.Encoding.UTF8.GetString(encodedBytes);
+            HttpResponseMessage mesg = await profile.Client.PostAsync("https://ddownload.com/" + item.ShareId, new FormUrlEncodedContent(paras));
 
-            Stream s = await profile.Client.GetStreamAsync(url);
+            Stream s = await profile.Client.GetStreamAsync(mesg.Headers.Location);
             return s;
         }
 

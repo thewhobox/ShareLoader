@@ -55,7 +55,8 @@ namespace ShareLoader.Manager
                 return;
             
             _context.Accounts.Update(model);
-            
+            _context.SaveChanges();
+
             StatisticModel stat = new StatisticModel();
             stat.EntityID = model.ID;
             stat.EntityType = "AccountVolDay";
@@ -70,7 +71,14 @@ namespace ShareLoader.Manager
             stat.Source = StatisticModel.SourceType.Item;
             _context.Statistics.Add(stat);
 
-            _context.SaveChanges();
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch
+            {
+
+            }
             await SocketHandler.Instance.SendAITrafficDay(model);
 
         }

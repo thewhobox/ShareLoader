@@ -17,6 +17,7 @@ namespace ShareLoader.Downloader
         public bool IsFree { get; } = false;
         public string Identifier { get; } = "so";
         public string UrlIdentifier { get; } = "share-online.biz";
+        public bool AllowClientRedirect { get; } = true;
 
 
         public async Task<DownloadItem> GetitemInfo(string id)

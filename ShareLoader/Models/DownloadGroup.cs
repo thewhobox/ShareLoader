@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -18,6 +19,7 @@ namespace ShareLoader.Models
         public string Sort { get; set; }
         public bool IsTemp { get; set; } = false;
 
+        [NotMapped]
         public List<DownloadItem> Items { get; set; } = new List<DownloadItem>();
     }
 
