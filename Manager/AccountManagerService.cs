@@ -8,6 +8,7 @@ using ShareLoader.Downloader;
 using ShareLoader.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -25,10 +26,8 @@ namespace ShareLoader.Manager
         {
             Console.WriteLine("Erstelle AccountManager");
             var optionsBuilder = new DbContextOptionsBuilder<DownloadContext>();
-
-            //optionsBuilder.UseMySql("server=teamserver;userid=admin;password=Mein#pw#mysqladmin;database=shareloader;");
-            //optionsBuilder.UseMySql(configuration.GetConnectionString("MySQLConnection"));
-            optionsBuilder.UseSqlite("Data Source=database.db");
+            string datapath = Path.Combine(settings.DownloadFolder, "database.db");
+            optionsBuilder.UseSqlite("Data Source=" + datapath);
 
             _context = new DownloadContext(optionsBuilder.Options);
             _context.Database.Migrate();
@@ -85,20 +84,6 @@ namespace ShareLoader.Manager
             
             _context.Accounts.Update(model);
             _context.SaveChanges();
-
-            StatisticModel stat = new StatisticModel();
-            stat.EntityID = model.ID;
-            stat.EntityType = "AccountVolDay";
-            stat.Value = model.TrafficLeft;
-            stat.Source = StatisticModel.SourceType.Item;
-            _context.Statistics.Add(stat);
-
-            stat = new StatisticModel();
-            stat.EntityID = model.ID;
-            stat.EntityType = "AccountVolWeek";
-            stat.Value = model.TrafficLeftWeek;
-            stat.Source = StatisticModel.SourceType.Item;
-            _context.Statistics.Add(stat);
 
             try
             {

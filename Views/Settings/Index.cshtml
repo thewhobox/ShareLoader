@@ -48,6 +48,11 @@
             <small class="text-muted">Downloads alle x Sekunden suchen.</small>
         </div>
         <div class="form-group">
+            <label asp-for="IntervalSleep"></label>
+            <input asp-for="IntervalSleep" />
+            <small class="text-muted">Download für x Millisekunden unterbrechen.</small>
+        </div>
+        <div class="form-group">
             <label asp-for="IntervalExtract"></label>
             @if (Model.ExtractImmedialy)
             {

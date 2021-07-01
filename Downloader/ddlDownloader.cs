@@ -81,18 +81,16 @@ namespace ShareLoader.Downloader
             paras.Add("redirect", "https://ddownload.com/");
             paras.Add("token", m.Groups[0].Value);
             paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
-            paras.Add("user", profile.Model.Username);
             paras.Add("pass", profile.Model.Password);
 
             try
             {
                 HttpResponseMessage resp = await profile.Client.PostAsync("https://ddownload.com/", new FormUrlEncodedContent(paras));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Console.WriteLine("Fehler beim einloggen bei ddownloader");
+                Console.WriteLine(ex.Message);
             }
             return profile;
         }

@@ -24,7 +24,6 @@ namespace ShareLoader.Manager
         public static bool _stopRequested = false;
 
         private Timer _state;
-        private double _current = 0;
         private double _lastCurrent = 0;
         private bool _isChecking = false;
         private List<double> _lastReadList;
@@ -38,42 +37,42 @@ namespace ShareLoader.Manager
         public void Log(string log)
         {
             Console.WriteLine("DownloadManager " + log);
-            bool logDateExists = DateTime.Now.ToShortDateString().Replace("/", ".") == logday;
-            if (!logDateExists)
-            {
-                if (!Directory.Exists(_settings.LogFolder))
-                {
-                    try
-                    {
-                        Directory.CreateDirectory(_settings.LogFolder);
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Could not create log Folder at: " + _settings.LogFolder);
-                        return;
-                    }
-                }
-                logday = DateTime.Now.ToShortDateString().Replace("/", ".");
-                logfile = Path.Combine(_settings.LogFolder, "log-" + logday + "-down.log");
+            //bool logDateExists = DateTime.Now.ToShortDateString().Replace("/", ".") == logday;
+            //if (!logDateExists)
+            //{
+            //    if (!Directory.Exists(_settings.LogFolder))
+            //    {
+            //        try
+            //        {
+            //            Directory.CreateDirectory(_settings.LogFolder);
+            //        }
+            //        catch
+            //        {
+            //            Console.WriteLine("Could not create log Folder at: " + _settings.LogFolder);
+            //            return;
+            //        }
+            //    }
+            //    logday = DateTime.Now.ToShortDateString().Replace("/", ".");
+            //    logfile = Path.Combine(_settings.LogFolder, "log-" + logday + "-down.log");
 
-                if (!File.Exists(logfile))
-                {
-                    try
-                    {
-                        w = new StreamWriter(File.Create(logfile));
-                    }
-                    catch
-                    {
-                        Console.WriteLine("Could not create log File at: " + logfile);
-                        return;
-                    }
-                }
-            }
+            //    if (!File.Exists(logfile))
+            //    {
+            //        try
+            //        {
+            //            w = new StreamWriter(File.Create(logfile));
+            //        }
+            //        catch
+            //        {
+            //            Console.WriteLine("Could not create log File at: " + logfile);
+            //            return;
+            //        }
+            //    }
+            //}
 
-            if (w == null) return;
+            //if (w == null) return;
 
-            w.WriteLine(DateTime.Now.ToShortTimeString() + " - " + log);
-            w.Flush();
+            //w.WriteLine(DateTime.Now.ToShortTimeString() + " - " + log);
+            //w.Flush();
         }
 
         public async void CheckQuery(CancellationToken stoppingToken)
@@ -132,15 +131,14 @@ namespace ShareLoader.Manager
             }
         }
 
-        public DownloadManagerService(IConfiguration configuration, AccountHelper account)
+        public DownloadManagerService(IConfiguration configuration, AccountHelper account, DownloadSettings settings)
         {
             _settings = DownloadSettings.Load();
 
 
             var optionsBuilder = new DbContextOptionsBuilder<DownloadContext>();
-            //optionsBuilder.UseMySql("server=teamserver;userid=admin;password=Mein#pw#mysqladmin;database=shareloader;");
-            //optionsBuilder.UseMySql(configuration.GetConnectionString("MySQLConnection"));
-            optionsBuilder.UseSqlite("Data Source=database.db");
+            string datapath = Path.Combine(settings.DownloadFolder, "database.db");
+            optionsBuilder.UseSqlite("Data Source=" + datapath);
 
 
             _context = new DownloadContext(optionsBuilder.Options);
@@ -246,7 +244,17 @@ namespace ShareLoader.Manager
             if (_isChecking) return;
             _isChecking = true;
 
-            DownloadItem item = (DownloadItem)state;
+            GroupItemModel model = (GroupItemModel)state;
+
+
+            double _current = 0;
+            string filePath = Path.Combine(_settings.DownloadFolder, model.Group.Name, "files", model.Item.Name);
+
+            if (File.Exists(filePath)){
+                FileInfo info = new FileInfo(filePath);
+                _current = info.Length;
+            }
+
 
             double temp = 0;
             double loaded = _current - _lastCurrent;
@@ -258,7 +266,7 @@ namespace ShareLoader.Manager
             foreach (double readed in _lastReadList)
                 temp += readed;
 
-            double averageRead = (temp / _lastReadList.Count) * 2;
+            double averageRead = (temp / _lastReadList.Count);
 
             if (averageRead <= 0.1 || averageRead > 209715200)
             {
@@ -266,16 +274,8 @@ namespace ShareLoader.Manager
                 return;
             }
 
-            StatisticModel stat = new StatisticModel();
-            stat.EntityID = item.ID;
-            stat.EntityType = "ItemAverageDownload";
-            stat.Value = averageRead / 1024 / 1024;
-            stat.Source = StatisticModel.SourceType.Item;
-
-            queryAdd.Add(stat);
-
-            double percent = Math.Floor((_current / item.Size) * 100);
-            await SocketHandler.Instance.SendIDPercentage(item, averageRead, percent.ToString());
+            double percent = Math.Floor((_current / model.Item.Size) * 100);
+            await SocketHandler.Instance.SendIDPercentage(model.Item, averageRead, percent.ToString());
 
 
             _isChecking = false;
@@ -350,29 +350,15 @@ namespace ShareLoader.Manager
 
             System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.OpenOrCreate);
 
-            Stopwatch sw = new Stopwatch();
-
-            _current = 0;
-            _state = new Timer(CheckStatus, item, 0, 500);
+            _state = new Timer(CheckStatus, new GroupItemModel() { Group = group, Item = item }, 0, 1000);
             Log("Timer started " + item.ID);
 
-            sw.Start();
             try
             {
-                const int buffersize = 1024 * 1024;
-                byte[] buffer = new byte[buffersize];
-                while (!_stopRequested)
-                {
-                    int readed = s.Read(buffer, 0, buffersize);
-                    if (readed == 0) break;
-                    _current += readed;
-
-                    fs.Write(buffer, 0, readed);
-                }
+                s.CopyTo(fs);
             }
             catch (Exception e)
             {
-                sw.Stop();
                 await SocketHandler.Instance.SendIDError(item);
                 item.State = DownloadItem.States.Error;
                 Log("State Error - " + item.ID.ToString() + " - " + item.Name);
@@ -381,7 +367,6 @@ namespace ShareLoader.Manager
                 _isDownloading = false;
                 return;
             }
-            sw.Stop();
 
             fs.Close();
             fs.Dispose();
@@ -389,16 +374,6 @@ namespace ShareLoader.Manager
             _state = null;
             Log("fs + state disposed");
 
-            Log("SW stopped");
-            StatisticModel stat = new StatisticModel();
-            stat.EntityID = item.ID;
-            stat.EntityType = "ItemDownloadTime";
-            stat.Value = sw.ElapsedTicks;
-            stat.Source = StatisticModel.SourceType.Item;
-            Log("stat erstellt");
-            queryAdd.Add(stat);
-            Log("stat in query");
-            sw = null;
 
 
             if (_stopRequested)

@@ -26,10 +26,8 @@ namespace ShareLoader.Manager
         {
             _settings = settings;
             var optionsBuilder = new DbContextOptionsBuilder<DownloadContext>();
-
-            //optionsBuilder.UseMySql("server=teamserver;userid=admin;password=Mein#pw#mysqladmin;database=shareloader;");
-            //optionsBuilder.UseMySql(configuration.GetConnectionString("MySQLConnection"));
-            optionsBuilder.UseSqlite("Data Source=database.db");
+            string datapath = Path.Combine(settings.DownloadFolder, "database.db");
+            optionsBuilder.UseSqlite("Data Source=" + datapath);
 
             _context = new DownloadContext(optionsBuilder.Options);
         }

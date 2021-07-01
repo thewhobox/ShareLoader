@@ -33,6 +33,9 @@ namespace ShareLoader.Classes
         [Display(Name = "Download Intervall")]
         public int IntervalDownload { get; set; }
 
+        [Display(Name = "Sleep Intervall")]
+        public int IntervalSleep { get; set; }
+
         [Display(Name = "Entpacken Intervall")]
         public int IntervalExtract { get; set; }
 

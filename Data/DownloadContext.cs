@@ -18,7 +18,6 @@ namespace ShareLoader.Data
         public DbSet<DownloadItem> Items { get; set; }
         public DbSet<DownloadError> Errors { get; set; }
         public DbSet<AccountModel> Accounts { get; set; }
-        public DbSet<StatisticModel> Statistics { get; set; }
         public DbSet<AppHash> Codes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

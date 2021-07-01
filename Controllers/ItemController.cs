@@ -21,28 +21,6 @@ namespace ShareLoader.Controllers
             _settings = settings;
         }
 
-        public IActionResult Statistics(int id)
-        {
-            List<StatisticModel> items = _context.Statistics.Where(i => i.EntityType == "ItemAverageDownload" && i.EntityID == id).ToList();
-
-            StatisticShowModel m = new StatisticShowModel() { itemid = id };
-            StatisticDataset data = new StatisticDataset() { label = "Geschwindigkeit MB/s" };
-
-            for (int i = 0; i < items.Count; i++)
-            {
-                if(i == 0 || i == items.Count - 1)
-                    m.data.labels.Add(items[i].Stamp.ToString());
-                else
-                    m.data.labels.Add("");
-
-                data.data.Add(items[i].Value);
-            }
-
-            m.data.datasets.Add(data);
-
-            return View(m);
-        }
-
         public IActionResult Errors(int id)
         {
             DownloadItem item = _context.Items.Single(i => i.ID == id);
@@ -72,7 +50,6 @@ namespace ShareLoader.Controllers
 
             item.State = DownloadItem.States.Waiting;
             _context.Update(item);
-            _context.RemoveRange(_context.Statistics.Where(s => s.Source == StatisticModel.SourceType.Item && s.EntityID == id));
             _context.SaveChanges();
 
             return RedirectToAction("Show", "Downloads", new { id = group.ID });

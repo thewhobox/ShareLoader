@@ -1,6 +1,7 @@
 {
   "ExtractImmedialy": false,
   "MoveImmedialy": false,
+  "IntervalSleep": 10,
   "IntervalDownload": 15,
   "IntervalExtract": 15,
   "IntervalMove": 15,

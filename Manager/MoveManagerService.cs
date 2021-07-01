@@ -19,12 +19,11 @@ namespace ShareLoader.Manager
         public readonly DownloadSettings _settings;
         public bool _isMoving = false;
 
-        public MoveManagerService(IConfiguration configuration)
+        public MoveManagerService(IConfiguration configuration, DownloadSettings settings)
         {
             var optionsBuilder = new DbContextOptionsBuilder<DownloadContext>();
-            //optionsBuilder.UseMySql("server=teamserver;userid=admin;password=Mein#pw#mysqladmin;database=shareloader;");
-            //optionsBuilder.UseMySql(configuration.GetConnectionString("MySQLConnection"));
-            optionsBuilder.UseSqlite("Data Source=database.db");
+            string datapath = Path.Combine(settings.DownloadFolder, "database.db");
+            optionsBuilder.UseSqlite("Data Source=" + datapath);
 
             _context = new DownloadContext(optionsBuilder.Options);
             _settings = DownloadSettings.Load();

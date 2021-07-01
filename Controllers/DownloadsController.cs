@@ -50,13 +50,7 @@ namespace ShareLoader.Controllers
                 StatisticDataset data = new StatisticDataset() { label = acc.Username };
                 data.fill = true;
 
-                if (!_context.Statistics.Any(s => s.EntityType == "AccountVolDay" && s.EntityID == acc.ID))
-                    continue;
-
-                StatisticModel stat1 = _context.Statistics.Where(s => s.EntityType == "AccountVolDay" && s.EntityID == acc.ID).OrderByDescending(s => s.Stamp).First();
-                //StatisticModel stat2 = _context.Statistics.Where(s => s.EntityType == "AccountVolWeek" && s.EntityID == acc.ID).OrderByDescending(s => s.Stamp).First();
-                data.data.Add(Math.Round(stat1.Value, 0));
-                //data.data.Add(Math.Round(stat2.Value, 0));
+                data.data.Add(Math.Round(acc.TrafficLeft, 0));
 
                 model.data.datasets.Add(data);
                 IdToIndex.Add(acc.ID, index);
@@ -140,9 +134,6 @@ namespace ShareLoader.Controllers
         {
             DownloadGroup group = _context.Groups.Single(g => g.ID == id);
             _context.Groups.Remove(group);
-
-            IEnumerable<StatisticModel> stats = _context.Statistics.Where(s => s.EntityID == id && s.Source == StatisticModel.SourceType.Item);
-            _context.Statistics.RemoveRange(stats);
 
             _context.SaveChanges();
             return RedirectToAction("List");

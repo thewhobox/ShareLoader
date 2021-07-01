@@ -2,11 +2,12 @@
   "ExtractImmedialy": false,
   "MoveImmedialy": false,
   "IntervalDownload": 15,
+  "IntervalSleep": 10,
   "IntervalExtract": 15,
   "IntervalMove": 15,
-  "DownloadFolder": "/share",
-  "MoveFolder": "/share/out",
-  "LogFolder": "/share",
+  "DownloadFolder": "/src/share",
+  "MoveFolder": "/src/share/out",
+  "LogFolder": "/src/share",
   "ZipPath": "7z",
   "ZipArgs": "e \"%filesDir%\" -aoa -o\"%extractDir%\""
 }
