@@ -1,0 +1,12 @@
+{
+  "ExtractImmedialy": false,
+  "MoveImmedialy": false,
+  "IntervalDownload": 15,
+  "IntervalExtract": 15,
+  "IntervalMove": 15,
+  "DownloadFolder": "C:\\Users\\mikeg\\Desktop\\ShareLoader\\",
+  "MoveFolder": "C:\\Users\\mikeg\\Desktop\\Shareloader\\out\\",
+  "LogFolder": "C:\\Users\\mikeg\\Desktop\\ShareLoader\\",
+  "ZipPath": "C:\\Program Files\\7-Zip\\7z.exe",
+  "ZipArgs": "e \"%filesDir%\" -aoa -o\"%extractDir%\""
+}
