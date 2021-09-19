@@ -1,0 +1,12 @@
+version: "3.9"
+services:
+  shareloader:
+    image: thewhobox/shareloader
+    ports:
+      - "8083:8083"
+    volumes:
+      - /share/ShareLoader:/mnt/share
+      - /share/Emby:/mnt/Emby
+      - logvolume01:/var/log
+volumes:
+  logvolume01: {}
