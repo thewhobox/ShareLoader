@@ -1,0 +1,21 @@
+@model List<DownloadGroup>
+@{
+    ViewData["Title"] = "Downloads";
+}
+
+
+
+<ul class="collection">
+    @foreach(DownloadGroup group in Model)
+    {
+        <li data-id="@group.Id" class="collection-item avatar">
+            <i class="material-icons circle">hourglass_bottom</i>
+            <span class="title"><a asp-controller="Downloads" asp-action="Detail" asp-route-id="@group.Id">@group.Name</a></span>
+            <p>
+                Dateien: @group.ItemsCount <br />
+                Aktion: <span>Unbekannt</span>
+            </p>
+            <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@group.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
+        </li>
+    }
+</ul>

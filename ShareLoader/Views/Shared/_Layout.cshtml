@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - ShareLoader</title>
+    <link rel="stylesheet" href="~/lib/materialize/materialize.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/ShareLoader.styles.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    @if (ViewData["Styles"] != null)
+    {
+        @foreach (string path in (List<string>)ViewData["Styles"])
+        {
+            <link rel="stylesheet" href=@path />
+        }
+    }
+</head>
+
+<body>
+    <div class="navbar-fixed">
+        <nav class="grey darken-3">
+            <div class="nav-wrapper">
+                <a style="max-width: 80%" class="brand-logo truncate">@ViewData["Title"]</a>
+                <a href="#" data-target="slide-out" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+            </div>
+        </nav>
+    </div>
+
+    <ul id="slide-out" class="sidenav sidenav-fixed">
+        <li class="logo">
+            <img src="https://purrfectlove.net/wp-content/uploads/2018/01/gingercat.jpg" />
+        </li>
+
+        <li class="waves-effect waves-red"><a asp-controller="Home" asp-action="Index">Startseite</a></li>
+        <li class="waves-effect waves-red"><a asp-controller="Downloads" asp-action="Index">Downloads</a></li>
+
+        @if (ViewData["Menus"] != null)
+        {
+            @foreach (string menu in (ViewData["Menus"] as List<string>))
+            {
+                <li class="waves-effect waves-red"><a asp-controller="Settings" asp-action="Index">@menu</a></li>
+            }
+        }
+
+
+        <li class="hide-on-large-only"><a href="/settings">Logout</a></li>
+
+    </ul>
+
+    <main>
+        @RenderBody()
+    </main>
+
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/materialize/materialize.min.js"></script>
+    @if (Context.Items["script"] != null)
+    {
+        <script src="@Context.Items["script"]"></script>
+    }
+    @if (ViewData["Scripts"] != null)
+    {
+        @foreach (string path in (ViewData["Scripts"] as List<string>))
+        {
+            <script src=@path></script>
+        }
+    }
+    @RenderSection("Scripts", required: false)
+    <script>
+        $(document).ready(function () {
+            $('.sidenav').sidenav();
+            $('select').formSelect();
+            $('.modal').modal();
+            $('.collapsible').collapsible();
+        });
+    </script>
+</body>
+
+</html>

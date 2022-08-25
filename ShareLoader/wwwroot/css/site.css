@@ -1,0 +1,48 @@
+html, body {
+  height: 100%;
+}
+
+.col.s2 > label, .col.s3 > label, .col.s4 > label {
+  position: absolute;
+  margin-top: 15px;
+}
+
+h1, h2, h3 {
+  margin: 1rem 0;
+}
+
+html > body > main {
+  height: calc(100% - 64px - 48px);
+}
+
+html > body > div > nav {
+  padding-left: 310px;
+}
+
+html > body > main {
+  padding-left: 300px !important;
+}
+
+@media only screen and (max-width: 992px) {
+  html body main, html > body > div > nav, .submenu {
+      padding: 0 !important;
+  }
+}
+
+.disabled {
+  pointer-events: none !important;
+  color: #e4e4e4 !important;
+}
+
+ul.sidenav li.logo img {
+  width: 100%;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+#slide-out {
+  height: 100%;
+}
+
+#slide-out li {
+  display: block;
+}
