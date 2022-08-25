@@ -15,7 +15,7 @@ public class DownloadContext : DbContext
     public DbSet<DownloadGroup> Groups { get; set; }
     //public DbSet<DownloadItem> Items { get; set; }
     //public DbSet<DownloadError> Errors { get; set; }
-    //public DbSet<AccountModel> Accounts { get; set; }
+    public DbSet<Account> Accounts { get; set; }
     //public DbSet<AppHash> Codes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

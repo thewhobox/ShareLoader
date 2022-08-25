@@ -1,0 +1,21 @@
+@model List<Account>
+@{
+    ViewData["Title"] = "Accounts";
+}
+
+
+
+<ul class="collection">
+    @foreach(Account acc in Model)
+    {
+        <li data-id="@acc.Id" class="collection-item avatar">
+            <i class="material-icons circle">hourglass_bottom</i>
+            <span class="title"><a asp-controller="Accounts" asp-action="Detail" asp-route-id="@acc.Id">@acc.Name</a></span>
+            <p>
+                @acc.Username <br />
+                @acc.ValidTill
+            </p>
+            <a asp-controller="Accounts" asp-action="Delete" asp-route-id="@acc.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
+        </li>
+    }
+</ul>

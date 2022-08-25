@@ -27,7 +27,6 @@ public class DownloadsController : Controller
         _context.SaveChanges();
         return RedirectToAction("Index");
     }
-    
 
     public IActionResult Delete(int Id)
     {
@@ -36,5 +35,12 @@ public class DownloadsController : Controller
         _context.Groups.Remove(group);
         _context.SaveChanges();
         return RedirectToAction("Index");
+    }
+
+    [HttpPost]
+    public IActionResult ApiAdd(List<string> links)
+    {
+
+        return Ok();
     }
 }
