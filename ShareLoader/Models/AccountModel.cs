@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ShareLoader.Models;
 
-public class Account
+public class AccountModel
 {
     [Key]
     public int Id { get; set; }
@@ -15,5 +15,10 @@ public class Account
     public DateTime ValidTill { get; set; }
     public float Credit { get; set; }
     public string Hoster { get; set; }
-    public bool AllowClientRedirect { get; set; } = true;
+    public bool AllowClientRedirect { get; set; } = true; //Todo remove
+
+    public bool IsValid()
+    {
+        return ValidTill > DateTime.Now;
+    }
 }

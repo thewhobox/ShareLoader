@@ -1,19 +1,24 @@
-@model List<Account>
+@model List<AccountModel>
 @{
     ViewData["Title"] = "Accounts";
 }
 
-
+<a asp-controller="Accounts" asp-action="Add" class="btn-floating btn-large waves-effect waves-light red"><i class="material-icons">add</i></a>
 
 <ul class="collection">
-    @foreach(Account acc in Model)
+    @foreach(AccountModel acc in Model)
     {
         <li data-id="@acc.Id" class="collection-item avatar">
-            <i class="material-icons circle">hourglass_bottom</i>
+            @if(acc.IsValid())
+            {
+                <i class="material-icons circle green">hourglass_bottom</i>
+            } else {
+                <i class="material-icons circle red">hourglass_bottom</i>
+            }
             <span class="title"><a asp-controller="Accounts" asp-action="Detail" asp-route-id="@acc.Id">@acc.Name</a></span>
             <p>
-                @acc.Username <br />
-                @acc.ValidTill
+                Benutzername: @acc.Username <br />
+                Gültig bis: @acc.ValidTill - Traffic: @acc.TrafficLeft
             </p>
             <a asp-controller="Accounts" asp-action="Delete" asp-route-id="@acc.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
         </li>

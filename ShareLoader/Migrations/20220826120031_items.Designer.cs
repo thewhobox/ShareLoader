@@ -9,8 +9,8 @@ using ShareLoader.Data;
 namespace ShareLoader.Migrations
 {
     [DbContext(typeof(DownloadContext))]
-    [Migration("20220825170624_account")]
-    partial class account
+    [Migration("20220826120031_items")]
+    partial class items
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -92,6 +92,51 @@ namespace ShareLoader.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Groups");
+                });
+
+            modelBuilder.Entity("ShareLoader.Models.DownloadItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DownloadGroupID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GroupID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Hoster")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("MD5")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Size")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Url")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Items");
                 });
 #pragma warning restore 612, 618
         }

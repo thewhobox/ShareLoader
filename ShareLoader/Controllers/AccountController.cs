@@ -21,16 +21,24 @@ public class AccountsController : Controller
         return View(_context.Accounts.ToList());
     }
 
+    [HttpGet]
     public IActionResult Add()
     {
-        _context.Accounts.Add(new Account() { Name = "ddownload", Username = "nutzer82683", Password = "123456789", Hoster = "ddl" });
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult Add(AccountModel acc)
+    {
+        _context.Accounts.Add(acc);
         _context.SaveChanges();
         return RedirectToAction("Index");
     }
 
     public IActionResult Delete(int Id)
     {
-        Account acc = _context.Accounts.SingleOrDefault(g => g.Id == Id);
+        AccountModel acc = _context.Accounts.SingleOrDefault(g => g.Id == Id);
         if(acc == null) return NotFound();
         _context.Accounts.Remove(acc);
         _context.SaveChanges();

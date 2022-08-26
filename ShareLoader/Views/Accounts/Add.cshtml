@@ -1,0 +1,45 @@
+@model AccountModel
+@{
+    ViewData["Title"] = "Account hinzufügen";
+}
+
+<div class="row">
+    <form class="col s12" method="post">
+        <div class="row">
+            <div class="input-field col s12">
+                <input asp-for="Name" type="text" autocomplete="off" required>
+                <label asp-for="Name">Name</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <select asp-for="Hoster" name="Hoster">
+                    <option value="ddl">ddownload</option>
+                </select>
+                <label asp-for="Hoster">Hoster auswählen</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s6">
+                <input asp-for="Username" type="text" class="validate" autocomplete="off" required>
+                <label asp-for="Username">Benutzername</label>
+            </div>
+            <div class="input-field col s6">
+                <input asp-for="Password" type="password" class="validate" autocomplete="off" required>
+                <label asp-for="Password">Passwort</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s3">
+                <button class="btn waves-effect waves-light green darken-1" type="submit" name="action">
+                    Download hinzufügen
+                </button>
+            </div>
+            
+                        
+            <div class="input-field col s3">
+                <a asp-action="Index" class="btn waves-effect waves-light red darken-1">Abbrechen</a>
+            </div>
+        </div>
+    </form>
+</div>

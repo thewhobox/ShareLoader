@@ -8,14 +8,13 @@ namespace ShareLoader.Data;
 
 public class DownloadContext : DbContext
 {
-    public DownloadContext(DbContextOptions<DownloadContext> options)
-        : base(options)
-    { }
+    public DownloadContext() : base() { }
+    public DownloadContext(DbContextOptions<DownloadContext> options) : base(options) { }
 
     public DbSet<DownloadGroup> Groups { get; set; }
-    //public DbSet<DownloadItem> Items { get; set; }
+    public DbSet<DownloadItem> Items { get; set; }
     //public DbSet<DownloadError> Errors { get; set; }
-    public DbSet<Account> Accounts { get; set; }
+    public DbSet<AccountModel> Accounts { get; set; }
     //public DbSet<AppHash> Codes { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
