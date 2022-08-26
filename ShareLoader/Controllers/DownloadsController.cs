@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using ShareLoader.Classes;
 using ShareLoader.Data;
 using ShareLoader.Models;
 
@@ -35,6 +36,22 @@ public class DownloadsController : Controller
         _context.Groups.Remove(group);
         _context.SaveChanges();
         return RedirectToAction("Index");
+    }
+
+    public IActionResult Detail(int Id)
+    {
+        DownloadGroup group = _context.Groups.SingleOrDefault(g => g.Id == Id);
+        if(group == null) return NotFound();
+
+        IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id);
+        int size = 0;
+        foreach(DownloadItem item in items)
+            size += item.Size;
+
+        ViewData["totalSize"] = DownloadHelper.GetSizeString(size);
+        ViewData["Items"] = items;
+
+        return View(group);
     }
 
     [HttpPost]

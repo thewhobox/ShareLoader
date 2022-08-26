@@ -1,3 +1,4 @@
+using ShareLoader.Classes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,15 +26,7 @@ public class DownloadItem
 
     public string GetSize()
     {
-        double size = Size;
-        string[] format = new string[] { "{0} bytes", "{0} KB", "{0} MB", "{0} GB", "{0} TB", "{0} PB", "{0} EB" };
-        int i = 0;
-        while (i < format.Length && size >= 1024)
-        {
-            size = (long)(100 * size / 1024) / 100.0;
-            i++;
-        }
-        return string.Format(format[i], size);
+        return DownloadHelper.GetSizeString(Size);
     }
 
     public string GetImage()

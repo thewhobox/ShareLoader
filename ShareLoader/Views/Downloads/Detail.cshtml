@@ -1,0 +1,25 @@
+@model DownloadGroup
+@{
+    ViewData["Title"] = "Downloads " + Model.Name;
+}
+
+<p>
+    Passwort: @Model.Password <br />
+    Dateien: @Model.ItemsCount <br />
+    Sortiername: @Model.Sort
+</p>
+
+
+<ul class="collection">
+    @foreach(DownloadItem item in ViewData["Items"] as IEnumerable<DownloadItem>)
+    {
+        <li data-id="@item.Id" class="collection-item avatar">
+            <i class="material-icons circle">hourglass_bottom</i>
+            <span class="title">@item.Name</span>
+            <p>
+                Größe: @item.GetSize()
+            </p>
+            <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
+        </li>
+    }
+</ul>

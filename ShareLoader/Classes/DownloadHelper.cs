@@ -6,6 +6,18 @@ namespace ShareLoader.Classes;
 
 public class DownloadHelper
 {
+    public static string GetSizeString(double size)
+    {
+        string[] format = new string[] { "{0} bytes", "{0} KB", "{0} MB", "{0} GB", "{0} TB", "{0} PB", "{0} EB" };
+        int i = 0;
+        while (i < format.Length && size >= 1024)
+        {
+            size = (long)(100 * size / 1024) / 100.0;
+            i++;
+        }
+        return string.Format(format[i], size);
+    }
+
     public static IDownloadManager GetDownloader(string item)
     {
         IDownloadManager downloader = null;
