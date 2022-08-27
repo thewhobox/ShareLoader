@@ -2,7 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using ShareLoader.Classes;
 using ShareLoader.Data;
+using ShareLoader.Manager;
 using ShareLoader.Models;
+using System.Text.RegularExpressions;
 
 namespace ShareLoader.Controllers;
 
@@ -10,6 +12,8 @@ public class DownloadsController : Controller
 {
     private readonly DownloadContext _context;
     private readonly ILogger<DownloadsController> _logger;
+    
+    public static CheckViewModel latestCheck;
 
     public DownloadsController(DownloadContext context, ILogger<DownloadsController> logger)
     {
@@ -24,9 +28,53 @@ public class DownloadsController : Controller
 
     public IActionResult Add()
     {
-        _context.Groups.Add(new DownloadGroup() { Name = "Testxy", ItemsCount = 120 });
-        _context.SaveChanges();
-        return RedirectToAction("Index");
+        if(latestCheck == null) return NotFound();
+
+        ViewData["OMDB_APIKEY"] = EnvironmentHelper.GetVariable("OMDB_APIKEY");
+
+
+        Match m = new Regex(@"[a-z \.\\\/\(\-]((19|20)[0-9]{2})[a-z \.\\\/\)\-]").Match(latestCheck.Name);
+
+        if (m.Success)
+        {
+            string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Groups[1].Value) - 1).Replace('.', ' ');
+            if (search.EndsWith(' '))
+                search = search.Substring(0, search.ToString().Length);
+            latestCheck.Search = search;
+            latestCheck.Type = DownloadType.Movie;
+        }
+        else
+        {
+            m = new Regex("(English|German)").Match(latestCheck.Name);
+            if (m.Success)
+            {
+                string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Value)).Replace('.', ' ');
+                if (search.EndsWith(' '))
+                    search = search.Substring(0, search.ToString().Length - 1);
+                latestCheck.Search = search;
+                latestCheck.Type = DownloadType.Movie;
+            }
+        }
+
+        m = new Regex(@"S([0-9]{1,2})[a-z \.\\\/\)\-]").Match(latestCheck.Name);
+        if (m.Success)
+        {
+            string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Value)).Replace('.', ' ');
+            if (search.EndsWith(' '))
+                search = search.Substring(0, search.ToString().Length - 1);
+            latestCheck.Search = search;
+            latestCheck.Type = DownloadType.Soap;
+        }
+
+        return View(latestCheck);
+    }
+
+    public async Task<IActionResult> GetItemInfo(string url)
+    {
+        IDownloadManager down = DownloadHelper.GetDownloader(url);
+        string id = down.GetItemId(url);
+        ItemModel item = await down.GetItemInfo(id);
+        return Ok(item);
     }
 
     public IActionResult Delete(int Id)
@@ -54,10 +102,19 @@ public class DownloadsController : Controller
         return View(group);
     }
 
-    [HttpPost]
+    //[HttpPost]
     public IActionResult ApiAdd(List<string> links)
     {
-
-        return Ok();
+        links = new List<string>() {
+            "https://ddownload.com/oo2muu8db32u/WsmdS.web.18p.tscc.S04E01.part1.rar",
+            "https://ddownload.com/anedz7ctzci2/WsmdS.web.18p.tscc.S04E01.part2.rar",
+            "https://ddownload.com/3rvox4e181n6/WsmdS.web.18p.tscc.S04E01.part3.rar",
+            "https://ddownload.com/sswi6pbcdw6i/WsmdS.web.18p.tscc.S04E01.part4.rar"
+        };
+        latestCheck = new CheckViewModel() {
+            Name = "Wer.stiehlt.mir.die.Show.S02.WebHD.HDR",
+            RawLinks  = string.Join(',', links)
+        };
+        return RedirectToAction("Add");
     }
 }
