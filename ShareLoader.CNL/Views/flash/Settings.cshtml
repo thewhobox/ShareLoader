@@ -1,0 +1,24 @@
+@{
+    ViewData["Title"] = "Einstellungen";
+}
+
+<form method="post">
+    <label for="basic-url" class="form-label">ShareLoader Host (<b></b>host</b>/Downloads/ApiTest)</label>
+    <div class="input-group mb-3">
+        <input id="url" name="url" type="text" class="form-control" value="@ViewData["MainUrl"]" />
+    </div>
+    <button type="submit" class="btn btn-primary">Anwenden</button>
+</form>
+<br />
+@if(ViewData["updated"] == "true")
+{
+    <div class="alert alert-success" role="alert">
+    Host wurde aktualisiert.
+    </div>
+}
+@if(ViewData["auto"] == "true")
+{
+    <div class="alert alert-info" role="alert">
+        Der Host wurde automatisch gefunden.
+    </div>
+}

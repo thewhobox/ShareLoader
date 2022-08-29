@@ -1,0 +1,26 @@
+data0 = field_jk / jk
+data1 = field_crypted / crypted
+cnl = field_source / package
+name = 
+
+http://127.0.0.1:9666/jdcheck.js
+{
+    var jdownloader = true;
+}
+
+cnl
+ByhY9DgDeL08wX6c8AUDyTAgpJylT2Amr044UdMzAs2xcCmLEqfO0_e2v8ezpW1hrf98gKHQR3JYt659yOgezQ
+data0
+32373937343434333834353435303838
+data1
+9pJTLrBYRvLQavE7v3qvcSHNEO2T607K6PYBiTwktI2OcUQ1VnaMJJO1uZNuOqt3ymPyYr/eApGU2YEHqy9y2QxBZ1KuE0glXNgRr8po2st98qJoinutxiVyIcdiCzKij9jYdxAtud7pwqlvWbx8XFRMjppydpJNZ5OgfNg3PT1lrU+YFHrPAMkKk0wIK2YS/rJM3bP4queQlXskGyz4Pb1xrafKns3JQc7RyQ/hR3KsQdssF/1efdfJ29LqteRU+5bTArOg4oAy0ZdZ1wFkfRfBzcZMdWIwuKn6nz5tt5FnV5OczP/LQiN+FYDGeUNbl4DcfFgYh80AYukoyL7pmZHL3wC6c756wy39KAkz/C9yV1VmSOeDYza7+nZJx3a9o4bTyKjWkAptG2bepJ7QNEApw95V20M1RKuLUsyxoWnnwbL2hY9ILIqaD9q4Se5Rsp1axYoRHT+39gQVC958VVIfuWffBQ3OxSXQzsKuaS8iKFdLhof9eI/OYcaytjcvicSK5dz4HzjeT9C7EfeBROq3ByFOo3+oQot3IFcYt8rMxnH2fM9FuviJi83OMFQjSm9C0Gkpr16F/sr9JXZPfUGD1vJ5Ppp/2BxuKbR8UvgVBIJjvo3Wj0IvXVNMQy5YB4jMMAroFWHyfVUn9y5tzdSH3jZGJ7hSoKfmWPmYPhqs5eTjh0TRBaIL+9Z6KC1qZ1JbGHBdxa+uAWMohUZH8v7OzUso0dtfDQEv+6ae2Eis5IKlvcXTCUTMaty5sSiar7qKDMnAUoqJ+A4cuHpwwWU0slTQEUw3BgbWEX+DDbIv8mAh2zEQV09wYPuec+4foaWjJ7zXrnFvtCEnNMausry7Ljz0tGs/+AxD1NfqaLef75V88N7sGh7SqFdfvfhPQ6lIYA6uGZdWsoOcMopZBvwzwkSMkU8T3HcY5nYTRs7Tduk7n55KVG40yNjwNI2PlBkVrcbqADDw5TPAPqLkHxJ0z5W2hkEjxUPII7ZHaBWJDARIeHo2qyoNmJHR+DzqohOz+HHOxwSNaJEhCLenpFApqaySw9UNC5dvWdOLXfvKnNBLfJvTuVdAFPW5Y5kZoGYxjDHQghp+jyDDCkh6v3aawCA7715PSj51iHMqNRMXI7fplR3bby/qv5TUmfc3qQB2FCrZR1uySZPrquTIEvBjbZLk34hhHp8dkLA+xHGNbMPHVpBjP9+A/s6UmH8qY9evZeqBItB6egMNS9FOPTY38zjlwLVaqqJ+WvxebWyx+XfxWMVq+qxByGWc7kXjureLwCrJNqMiJYahOAtgSUDZ1HG1ZGytHH83kcOo4TSyJXLSF0izcZf2Aoger1dVsZ/7bUcRUXj5Sc7qPbH1Vo30aBDZkDhYgK3vTsZGfVOSPw7UCZqS581F7Sj8fOOd1SeyTHJFiKybfngD8PJNP+ztCc69/bQYhoKKh9FO6NJNKys8rFPny4FVqN8/j6E6FY9yzbuZRWN7Mou8VZpNK+EyqlEEuOiiKbCtA2Rwkibd2TAdMVCvCzisYbGSoxhDkcNh+SlrFcYi+z6G3lYb4T8H0TJgGJ7BWOtJ4r0QZf0rccRS/S7MeA8wxMayGwjgaejXN8iNTZrUJ1A2LpwxquFyrCa1emBBFpIIdsf9+wMxAFRWuqcaWfJbs0DfILYcUG8nT/qGeVqgfkh0/msVz69OMPmbweNY7y4it4V81lB/ub18oz+a2W34qX64IQRTUwRvzt0OUxwrnFN33L7aPAvvQSUTeb1eByyubki/SJtsSvIHVYhxSRDan6cVBUvrC7Rqszm1Dk6zuCfXubHeHF7j8NrVumJCrmeP5eUZM6ScBEhgrmCL+hP4+Xhy0lYtADX/4NtfIEv9UHaljzU4EU8JSd0AOj5jSzwzRg681LheuE4UWEdVjU4xOScmaBVKCqKytyc4YzOsc7zGU+UtGw==
+name
+'Wer.stiehlt.mir.die.Show.S02.GERMAN.720p.WEB.x264-TSCC - filecrypt.cc'
+
+<form action="http://127.0.0.1:9666/flash/addcrypted2" id="jdform" target="hidden" method="POST" class="cnlform">
+      <input type="hidden" name="passwords" value="filecrypt.cc">
+      <input type="hidden" name="source" value="filecrypt.cc">
+      <input type="hidden" name="package" id="field_source" value="">
+      <input type="hidden" name="jk" id="field_jk" value="">
+      <input type="hidden" name="crypted" id="field_crypted" value="">
+    </form>

@@ -3,6 +3,25 @@
     ViewData["Title"] = "Download hinzufügen";
 }
 <style>
+
+    .form-container table {
+        width: 100%;
+        margin-top: 30px;
+    }
+
+    .form-container input {
+        width: 100%;
+    }
+
+    .form-container tr.input td {
+        width: 50%;
+    }
+
+    li.alert {
+        background-color: #fc5252;
+    }
+
+
     #searchResults img {
         border: 3px solid transparent;
         font-size: 13px;
@@ -15,69 +34,98 @@
         border: 3px solid green;
         box-shadow: none !important;
     }
+
+    .card {
+        width: 350px;
+        margin: 5px;
+        float: left;
+    }
+
+    .card .card-header.bg-red .check {
+        display:none;
+    }
+
+    .card .card-footer {
+        display: block;
+        min-height: auto;
+        padding: 0;
+    }
+
+    .card .card-footer button {
+        display: block;
+        width: 100%;
+    }
+
+    .card .card-footer > div {
+        position: absolute;
+        z-index: 1000;
+        background-color: white;
+        width: 100%;
+        border: 1px solid gray;
+        box-shadow: rgb(95, 95, 95) 0px 6px 10px 5px;
+    }
+
+    .card ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0 10px;
+        overflow-x: scroll;
+    }
 </style>
 
 
 
 <form asp-controller="Downloads" asp-action="AddDlcConfirm" data-role="validator" method="post" enctype="multipart/form-data">
-    <div class="row">
-        <div class="col s12">
-            <div class="progress">
-                <div id="progressbar" class="determinate" style="width: 70%"></div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-            <div class="col s4">
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input asp-for="Name" type="text" autocomplete="off" placeholder="Name des Downloads" data-validate="required">
-                        <label asp-for="Name">Name</label>
-                    </div>
-                </div>
+    <div class="grid">
+        <div class="row">
+            <div class="cell">
+                <div class="form-container" style="height: 100%">
+                    <h2>DLC Hinzufügen</h2>
+                    <hr />
 
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input id="Password" name="Password" type="text" autocomplete="off" placeholder="Passwort zum Entpacken">
-                        <label for="Password">Name</label>
+                    <div class="form-group">
+                        <label asp-for="Name"></label>
+                        <input asp-for="Name" placeholder="Name des Downloads" maxlength="200" data-validate="required maxlength=200" autocomplete="off" />
+                        <span class="invalid_feedback">
+                            Bitte gib einen Namen ein. Maximal 200 Zeichen.
+                        </span>
+                        <small class="text-muted">Name wird nur zum Anzeigen verwendet.</small>
                     </div>
-                </div>
-
-                <div class="row">
-                    <div class="input-field col s12">
-                        <select asp-for="Type" asp-items="Html.GetEnumSelectList<DownloadType>()" data-validate="required not=0"></select>
+                    <div class="form-group">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" autocomplete="off" placeholder="Passwort zum Entpacken" />
+                    </div>
+                    <div class="form-group">
                         <label asp-for="Type"></label>
+                        <select asp-for="Type" asp-items="Html.GetEnumSelectList<DownloadType>()" data-validate="required not=0"></select>
                         <span class="invalid_feedback">
                             Bitte wähle einen Typ aus.
                         </span>
                     </div>
-                </div>
 
-                
-                <div class="row">
-                    <div class="input-field col s12">
-                        <input asp-for="NameToSort" type="text" autocomplete="off" data-validate="required" readonly="readonly" value=" " />
-                        <label asp-for="NameToSort">Sortieren</label>
-                        <span class="helper-text">Nicht bearbeiten</span>
+                    <div class="form-group">
+                        <label for="nameToSort">Sortieren</label>
+                        <input id="nameToSort" name="nameToSort" type="text" data-validate="required" readonly="readonly" />
+                        <small class="text-muted">Nicht bearbeiten!</small>
                     </div>
-                </div>
 
-                <div class="row">
-                    <div class="input-field col s6">
-                        <button class="btn waves-effect waves-light green darken-1 disabled submit" type="submit" name="action">Absenden</button>
-                    </div>
-                    <div class="input-field col s6">
-                        <a asp-controller="Downloads" asp-action="Index" class="btn waves-effect waves-light red darken-1">Abbrechen</a>
+                    <div class="form-group">
+                        <button class="button success disabled">Download hinzufügen</button>
+                        <a asp-action="Index" class="button">Abbrechen</a>
                     </div>
                 </div>
             </div>
 
-            <div class="col s8">
+            <div class="cell">
+                <div class="form-container" style="height: 100%">
+                    <h2>Sortieren</h2>
+                    <hr />
+
                     <div id="searchBar" style="visibility:hidden" data-role="progress" data-type="line" data-small="true"></div>
 
-                    <div class="input-field">
-                        <input id="inSearch" type="text" autocomplete="off" value="@Model.Search" placeholder="Suche nach der Serie/Film" />
-                        <label for="inSearch">Suchtext oder Imdb-ID</label>
+                    <div class="form-group">
+                        <input id="inSearch" type="text" placeholder="Suche nach der Serie/Film" value="@Model.Search" disabled="disabled" autocomplete="off" />
+                        <small class="text-muted">Suchtext oder Imdb-ID</small>
                     </div>
 
 
@@ -87,15 +135,22 @@
 
                     <div style="clear:both;">
                         <a href="javascript:searchBack()" class="button">Zurück</a>
-                        <span id="currentPage">0</span> / <span id="totalPage">0</span>
+                        <span id="currentPage">0</span> / <span id="totalPage">1</span>
                         <a href="javascript:searchNext()" class="button">Weiter</a>
                     </div>
 
-                    <div class="input-field" id="inSeasonD" style="clear:both;display:none">
-                        
+                    <div class="form-group" id="inSeasonD" style="clear:both;display:none">
+                        <select id="inSeason" disabled="disabled"></select>
                     </div>
+
+                </div>
             </div>
         </div>
+    </div>
+
+    <div id="InfoBox">
+        Verarbeite Links: <span id="InfoProgress">0</span>/@Model.RawLinksCount
+    </div>
 
     <div id="LinkGrid" class="grid">
     </div>
@@ -112,13 +167,37 @@
         let totalPage = 0;
         let links = "@Html.Raw(Model.RawLinks)".split(',');
         let currentCheckIndex = 0;
-        let omdbapi = '@Html.Raw(ViewData["OMDB_APIKEY"])';
-        let items = {};
 
         $(document).ready(function () {
+            initTable();
             checkSearch();
             checkSeason();
             checkLinks();
+        });
+
+        function initTable() {
+            for(let i = 0; i < links.length; i++)
+            {
+                let domain = links[i].substring(8);
+                domain = domain.substring(0, domain.indexOf('/'));
+                console.log(domain);
+                domain = domain.replace('.', "%2E");
+                let id = links[i].substring(7 + domain.length);
+                if(id.indexOf('/') != -1)
+                    id = id.substring(0, id.indexOf('/'));
+
+                $("#LinkGrid").append("<div class='row' data-id='" + id + "'><div class='cell'><input type='checkbox' data-role='checkbox' />" + id + "</div><div class='cell state'>Wartet</div><div class='cell-3 name'>-</div><div class='cell size'>0 Bytes</div></div>");
+            }
+        }
+
+        $(".card-header input[type=checkbox]").change(function () {
+            let isChecked = $(".card-header input[type=checkbox]").prop("checked");
+            let group = $(this).attr("data-group");
+
+            if (isChecked)
+                $(".card[data-group=" + group + "] .card-footer input").attr("checked", "checked");
+            else
+                $(".card[data-group=" + group + "] .card-footer input").removeAttr("checked");
         });
 
         $("#inSearch").keyup(function () {
@@ -133,8 +212,15 @@
                 imdbid = "";
                 currentPage = 1;
                 search();
-                $("input[name=NameToSort]").attr("value", query.replace(" ", "."));
+                $("input[name=nameToSort]").attr("value", query.replace(" ", "."));
             }
+        });
+
+        $("#inSeason").change(function () {
+            if ($("#inSeason").val() != "select")
+                setName();
+            else
+                setname("none");
         });
 
         $("#Type").change(function () {
@@ -143,12 +229,10 @@
         });
 
         function checkLinks() {
-            let perc = Math.round((100 / links.length) * currentCheckIndex);
-            $("#progressbar").css("width", perc + "%");
+            $("#InfoProgress").html(currentCheckIndex);
             if(currentCheckIndex == links.length)
             {
-                console.log(items);
-                $("button.submit").removeClass("disabled");
+                $("button.success").removeClass("disabled");
                 return;
             }
             let item = links[currentCheckIndex];
@@ -164,8 +248,9 @@
             if(id.indexOf('/') != -1)
                 id = id.substring(0, id.indexOf('/'));
                 
+            $("div.row[data-id=" + id + "] div.state").html("Abfragen");
             console.log(id);
-            $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), function (data) {
+            $.getJSON("http://localhost:9666/flash/itemInfo/" + id + "?domain=" + domain, function (data) {
                 let ele = $("div.row[data-id=" + id + "]");
                 $("div.state", ele).html(data.isOnline ? "Online" : "Offline");
                 $("div.name", ele).html(data.name);
@@ -179,12 +264,6 @@
                     size = size / 1024;
                 }
                 $("div.size", ele).html(Math.round(size) + " " + expos[expo]);
-
-                items[id] = {
-                    "online": data.isOnline,
-                    "name": data.name,
-                    "size": Math.round(size) + " " + expos[expo]
-                };
                 checkLinks();
             });
         }
@@ -208,30 +287,30 @@
                     console.log("Film");
                     $("#inSearch").removeAttr('disabled');
                     $("#inSeasonD").css("display", "none");
-                    $("#NameToSort").removeAttr('disabled');
-                    $("#NameToSort").attr('data-validate', 'required');
+                    $("#nameToSort").removeAttr('disabled');
+                    $("#nameToSort").attr('data-validate', 'required');
                     break;
                 case "2":
                     stype = "series";
                     console.log("Serie");
                     $("#inSearch").removeAttr('disabled');
                     $("#inSeasonD").css("display", "block");
-                    $("#NameToSort").removeAttr('disabled');
-                    $("#NameToSort").attr('data-validate', 'required');
+                    $("#nameToSort").removeAttr('disabled');
+                    $("#nameToSort").attr('data-validate', 'required');
                     break;
                 case "3":
                     stype = "";
                     console.log("Anderes");
                     $("#inSearch").attr('disabled', 'disabled');
                     $("#inSeasonD").css("display", "none");
-                    $("#NameToSort").attr('disabled', 'disabled');
-                    $("#NameToSort").removeAttr('data-validate');
+                    $("#nameToSort").attr('disabled', 'disabled');
+                    $("#nameToSort").removeAttr('data-validate');
                     break;
                 default:
                     $("#inSearch").attr('disabled', 'disabled');
                     $("#inSeasonD").css("display", "none");
-                    $("#NameToSort").attr('disabled', 'disabled');
-                    $("#NameToSort").removeAttr('data-validate');
+                    $("#nameToSort").attr('disabled', 'disabled');
+                    $("#nameToSort").removeAttr('data-validate');
                     break;
             }
             currentPage = 1;
@@ -239,7 +318,7 @@
         }
 
         function searchBack() {
-            if (currentPage <= 1)
+            if (currentPage == 1)
                 return;
 
             currentPage -= 1;
@@ -247,8 +326,6 @@
         }
 
         function searchNext() {
-            if(currentPage >= totalPage) 
-                return;
             currentPage += 1;
             search();
         }
@@ -257,7 +334,7 @@
             $("#currentPage").html(currentPage);
             $("#searchBar").css("visibility", "visible");
             let query = $("#inSearch").val();
-            $.getJSON("https://www.omdbapi.com/?apikey=" + omdbapi + "&s=" + query + "&type=" + stype + "&page=" + currentPage, function (data) {
+            $.getJSON("https://www.omdbapi.com/?apikey=e4e995ba&s=" + query + "&type=" + stype + "&page=" + currentPage, function (data) {
                 console.log(data);
                 $("#searchResults").html("");
                 if (data.Response == "False") {
@@ -302,51 +379,40 @@
         }
 
         function getSeasons(imdbid, addName = false) {
-            $.getJSON("https://www.omdbapi.com/?apikey=" + omdbapi + "&i=" + imdbid, function (data) {
+            $.getJSON("https://www.omdbapi.com/?apikey=e4e995ba&i=" + imdbid, function (data) {
                 if (data.Response == "False") {
                     alert("Imdb ID nicht gefunden");
                     setName("none");
-                    $("#inSeasonD").html('<select id="inSeason"></select>');
-                    $('select').formSelect();
                     return;
                 }
 
                 if (addName) {
                     setName(data.Title, data.Year);
-                    $("#searchResults").html(data.Title);
+                    $("#serachResults").html(data.Title);
                 }
 
-                let selectele = '<select id="inSeason">';
-
-                selectele += "<option value=\"select\" disabled=\"disabled\">Bitte Staffel auswählen</option>";
-                selectele += "<option value=\"dynamisch\">Staffelpaket</option>";
+                $("#inSeason").html("");
+                $("#inSeason").append("<option value=\"select\">Bitte Staffel auswählen</option>");
+                $("#inSeason").append("<option value=\"dynamisch\">Staffelpaket</option>");
                 for (let i = 1; i <= data.totalSeasons; i++) {
                     let iteration = i;
                     if (iteration < 10)
                         iteration = "0" + i;
                     if (iteration == season) {
-                        selectele += "<option value=\"" + iteration + "\" selected>Staffel " + iteration + "</option>";
+                        $("#inSeason").append("<option value=\"" + iteration + "\" selected>Staffel " + iteration + "</option>");
+                        setName();
                     }
                     else
-                        selectele += "<option value=\"" + iteration + "\">Staffel " + iteration + "</option>";
+                        $("#inSeason").append("<option value=\"" + iteration + "\">Staffel " + iteration + "</option>");
                 }
 
-                selectele += '</select>';
-                $("#inSeasonD").html(selectele);
-                $('select').formSelect();
-                setName();
-                $("#inSeason").change(function () {
-                    if ($("#inSeason").val() != "select")
-                        setName();
-                    else
-                        setname("none");
-                });
+                $("#inSeason").prop("disabled", false);
             });
         }
 
         function setName(name = "", year = 0) {
             if (name == "none") {
-                $("input[name=NameToSort]").attr("value", "");
+                $("input[name=nameToSort]").attr("value", "");
                 return;
             }
 
@@ -376,7 +442,7 @@
             
             
             
-            $("input[name=NameToSort]").attr("value", sort);
+            $("input[name=nameToSort]").attr("value", sort);
         }
     </script>
 

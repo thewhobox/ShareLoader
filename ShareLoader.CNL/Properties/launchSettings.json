@@ -3,15 +3,15 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:11860"
+      "applicationUrl": "http://localhost:9666"
     }
   },
   "profiles": {
-    "ShareLoader": {
+    "ShareLoader.CNL": {
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:5162",
+      "applicationUrl": "http://localhost:9666",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

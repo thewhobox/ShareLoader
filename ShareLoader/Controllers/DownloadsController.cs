@@ -102,8 +102,13 @@ public class DownloadsController : Controller
         return View(group);
     }
 
+    public IActionResult ApiTest()
+    {
+        return Ok("ShareLoader");
+    }
+
     //[HttpPost]
-    public IActionResult ApiAdd(List<string> links)
+    public IActionResult ApiAddTest(List<string> links)
     {
         links = new List<string>() {
             "https://ddownload.com/oo2muu8db32u/WsmdS.web.18p.tscc.S04E01.part1.rar",
@@ -116,5 +121,15 @@ public class DownloadsController : Controller
             RawLinks  = string.Join(',', links)
         };
         return RedirectToAction("Add");
+    }
+
+    public IActionResult ApiAdd(string links)
+    {
+        System.Console.WriteLine("ApiAdd2");
+        byte[] linksb64 = System.Convert.FromBase64String(links);
+        var plainTextBytes = System.Text.Encoding.UTF8.GetString(linksb64);
+        System.Console.WriteLine(plainTextBytes);
+        latestCheck = Newtonsoft.Json.JsonConvert.DeserializeObject<CheckViewModel>(plainTextBytes);
+        return Ok("ShareLoader");
     }
 }

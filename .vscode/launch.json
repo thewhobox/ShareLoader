@@ -23,6 +23,26 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/ShareLoader/Views"
             }
+        },
+        {
+            "name": "ShareLoader.CNL",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-clicknload",
+            "program": "${workspaceFolder}/ShareLoader.CNL/bin/Debug/net6.0/ShareLoader.CNL.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/ShareLoader.CNL",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/ShareLoader.CNL/Views"
+            }
         }
     ]
 }
