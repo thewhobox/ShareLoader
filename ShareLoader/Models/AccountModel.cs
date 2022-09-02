@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ShareLoader.Classes;
 
 namespace ShareLoader.Models;
 
@@ -21,4 +22,11 @@ public class AccountModel
     {
         return ValidTill > DateTime.Now;
     }
+
+    
+    public string GetSize()
+    {
+        return DownloadHelper.GetSizeString(TrafficLeft);
+    }
+
 }

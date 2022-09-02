@@ -54,13 +54,19 @@ public class AccountChecker
 
                 context.SaveChanges();
             }
-            return;
+            
+            LastChecked = DateTime.Now;
+            await Task.Delay(TimeSpan.FromMinutes(1));
         }
 
-        LastChecked = DateTime.Now;
-        await Task.Delay(TimeSpan.FromMinutes(5));
     }
 
+    public AccountProfile GetProfile(DownloadItem item)
+    {
+        //TODO also check if enough traffic left
+        AccountProfile profile = Profiles.Values.SingleOrDefault(p => p.Model.Hoster == item.Hoster);
+        return profile;
+    }
 
     private async Task Login(AccountModel acc)
     {

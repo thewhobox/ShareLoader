@@ -1,6 +1,4 @@
-
-
-namespace ShareLoader.Models;
+namespace ShareLoader.Share;
 
 public class ItemModel
 {
@@ -9,4 +7,6 @@ public class ItemModel
     public string Downloader { get; set; }
     public int Size { get; set; }
     public bool IsOnline { get; set; }
+    public int GroupId { get; set; }
+    public string Url { get; set; }
 }

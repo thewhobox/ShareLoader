@@ -1,4 +1,5 @@
 using ShareLoader.Classes;
+using ShareLoader.Share;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -19,9 +20,21 @@ public class DownloadItem
     public int Size { get; set; }
     public States State { get; set; } = States.Waiting;
     [MaxLength(32)]
-    public string MD5 { get; set; }        
+    public string MD5 { get; set; } = "";      
     public string Hoster { get; set; }
 
+
+    public DownloadItem() { }
+
+    public DownloadItem(ItemModel model)
+    {
+        ItemId = model.Id;
+        Name = model.Name;
+        GroupID = model.GroupId;
+        Size = model.Size;
+        Hoster = model.Downloader;
+        Url = model.Url;
+    }
 
 
     public string GetSize()
@@ -34,29 +47,60 @@ public class DownloadItem
         switch (State)
         {
             case States.Finished:
-                return "mif-checkmark fg-green";
+                return "task_alt";
 
             case States.Downloaded:
-                return "mif-checkmark fg-orange";
+                return "file_download_done";
 
             default:
             case States.Waiting:
-                return "mif-hour-glass fg-darkGrey";
+                return "hourglass_bottom";
 
             case States.Downloading:
-                return "mif-file-download fg-darkGrey";
+                return "downloading";
 
             case States.Error:
-                return "mif-warning fg-red";
+                return "warning_amber";
 
             case States.Extracting:
-                return "mif-stackoverflow fg-mauve ani-flash";
+                return "folder_zip";
 
             case States.Extracted:
-                return "mif-stackoverflow fg-darkMauve";
+                return "folder";
 
             case States.Moving:
-                return "mif-file-download fg-darkBlue ani-flash";
+                return "copy_all";
+        }
+    }
+    
+    public string GetColor()
+    {
+        switch (State)
+        {
+            case States.Finished:
+                return "green";
+
+            case States.Downloaded:
+                return "orange darken-2";
+
+            default:
+            case States.Waiting:
+                return "gray darken-1";
+
+            case States.Downloading:
+                return "orange lighten-2";
+
+            case States.Error:
+                return "red";
+
+            case States.Extracting:
+                return "purple lighten-2";
+
+            case States.Extracted:
+                return "purple darken-2";
+
+            case States.Moving:
+                return "brown lighten-1";
         }
     }
 }
@@ -71,5 +115,6 @@ public enum States
     Extracted,
     Moving,
     Finished,
-    Error
+    Error,
+    Paused
 }

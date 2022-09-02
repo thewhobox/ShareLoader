@@ -7,13 +7,17 @@
     <div class="input-group mb-3">
         <input id="url" name="url" type="text" class="form-control" value="@ViewData["MainUrl"]" />
     </div>
+    <label for="basic-url" class="form-label">Download-Ordner</label>
+    <div class="input-group mb-3">
+        <input id="download" name="download" type="text" class="form-control" value="@ViewData["DownloadPath"]" />
+    </div>
     <button type="submit" class="btn btn-primary">Anwenden</button>
 </form>
 <br />
 @if(ViewData["updated"] == "true")
 {
     <div class="alert alert-success" role="alert">
-    Host wurde aktualisiert.
+    Einstellungen wurde aktualisiert.
     </div>
 }
 @if(ViewData["auto"] == "true")

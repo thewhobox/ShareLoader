@@ -1,0 +1,1 @@
+{"settings":"{\"DownloadFolder\":\"C:\\\\Users\\\\u6\\\\ShareLoader\",\"MoveFolder\":\"C:\\\\Users\\\\u6\\\\ShareLoader_out\",\"LogFolder\":\"C:\\\\Users\\\\u6\\\\ShareLoader_log\",\"ZipPath\":\"K:\\\\Mike\\\\7-ZipPortable\\\\App\\\\7-Zip64\\\\7z.exe\",\"ZipArgs\":\"e \\\"%filesDir%\\\" -bsp1 -aoa -o\\\"%extractDir%\\\" -p%pass%\"}"}

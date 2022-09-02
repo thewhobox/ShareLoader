@@ -1,4 +1,4 @@
-namespace ShareLoader.CNL.Models;
+namespace ShareLoader.Share;
 
 using System.ComponentModel.DataAnnotations;
 
@@ -6,19 +6,12 @@ public class CheckViewModel
 {
     public string Name { get; set; }
     public string Password { get; set; }
-    public List<LinkGroup> Groups { get; set; }
+    public List<ItemModel> Links { get; set; }
     public DownloadType Type { get; set; }
     public string RawLinks { get; set; }
     public string Search { get; set; }
-    public int RawLinksCount { get; set; }
+    public string NameToSort { get; set; }
 }
-
-public class LinkGroup
-{
-    public string Name { get; set; }
-    public string[] Links { get; set; }
-}
-
 
 public enum DownloadType
 {

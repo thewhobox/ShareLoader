@@ -12,10 +12,11 @@
             <i class="material-icons circle">hourglass_bottom</i>
             <span class="title"><a asp-controller="Downloads" asp-action="Detail" asp-route-id="@group.Id">@group.Name</a></span>
             <p>
-                Dateien: @group.ItemsCount <br />
-                Aktion: <span>Unbekannt</span>
+                Downloaded: <span class="countD">-</span>/@group.ItemsCount<br />
+                Extracted: <span class="countE">-</span>/@group.ItemsCount<br />
+                Finished: <span class="countF">-</span>/@group.ItemsCount<br />
+                Error: <span class="countX">-</span>/@group.ItemsCount<br />
             </p>
-            <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@group.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
         </li>
     }
 </ul>

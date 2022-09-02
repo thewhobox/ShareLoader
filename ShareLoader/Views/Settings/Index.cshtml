@@ -1,0 +1,53 @@
+@model SettingsModel
+@{
+    ViewData["Title"] = "Einstellungen";
+}
+
+<form asp-action="Index" data-role="validator" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="input-field col s12">
+            <input asp-for="DownloadFolder" type="text" autocomplete="off" data-validate="required">
+            <label asp-for="DownloadFolder">Download-Ordner</label>
+            <span class="helper-text">In diesem Ordner werden die Dateien heruntergeladen.</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            <input asp-for="MoveFolder" type="text" autocomplete="off" data-validate="required">
+            <label asp-for="MoveFolder">Ziel-Ordner</label>
+            <span class="helper-text">In diesen Ordner werden die entpackten Dateien verschoben.</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            <input asp-for="LogFolder" type="text" autocomplete="off" data-validate="required">
+            <label asp-for="LogFolder">Log-Ordner</label>
+            <span class="helper-text">In diesen Ordner werden die Logs erstellt.</span>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="input-field col s12">
+            <input asp-for="ZipPath" type="text" autocomplete="off" data-validate="required">
+            <label asp-for="ZipPath">Zip Pfad</label>
+            <span class="helper-text">Pfad zum Programm für das entpacken. (C:\programs\7z.exe)</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            <input asp-for="ZipArgs" type="text" autocomplete="off" data-validate="required">
+            <label asp-for="ZipArgs">Zip Argumente</label>
+            <span class="helper-text">Argumente für das Entpacken. (-e -pw password)</span>
+            <span class="helper-text">%filesDir%  -  %extractDir%  -  %pass%</span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
+            <button class="btn">Speichern</button>
+        </div>
+    </div>
+</form>

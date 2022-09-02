@@ -2,6 +2,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddSingleton<IHostedService, ShareLoader.CNL.Classes.BackgroundWatcher>();
 
 var app = builder.Build();
 

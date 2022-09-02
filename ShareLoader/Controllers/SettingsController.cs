@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ShareLoader.Data;
 using ShareLoader.Models;
+using ShareLoader.Share;
 
 namespace ShareLoader.Controllers;
 
@@ -18,6 +19,14 @@ public class SettingsController : Controller
 
     public IActionResult Index()
     {
-        return View();
+        SettingsModel model = SettingsHelper.GetSetting<SettingsModel>("settings");
+        return View(model);
+    }
+
+    [HttpPost]
+    public IActionResult Index(SettingsModel model)
+    {
+        SettingsHelper.SetSetting("settings", model);
+        return RedirectToAction("Index");
     }
 }

@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using ShareLoader.Share;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,17 +16,15 @@ public class DownloadGroup
     public DownloadType Type { get; set; }
     public string Sort { get; set; } = "";
     public int ItemsCount { get; set; }
-}
 
+    public DownloadGroup() { }
 
-public enum DownloadType
-{
-    [Display(Name = "Unbekannt")]
-    Unknown,
-    [Display(Name = "Film")]
-    Movie,
-    [Display(Name = "Serie")]
-    Soap,
-    [Display(Name = "Anderes")]
-    Other
+    public DownloadGroup(CheckViewModel model)
+    {
+        Name = model.Name;
+        Password = model.Password ?? "";
+        Sort = model.NameToSort;
+        ItemsCount = model.Links.Count;
+        Type = model.Type;
+    }
 }

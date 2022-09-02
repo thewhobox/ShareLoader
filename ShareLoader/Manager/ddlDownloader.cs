@@ -1,6 +1,7 @@
 using Newtonsoft.Json.Linq;
 using ShareLoader.Classes;
 using ShareLoader.Models;
+using ShareLoader.Share;
 using System.Text.RegularExpressions;
 
 namespace ShareLoader.Manager;
@@ -38,16 +39,23 @@ public class ddlDownloader : IDownloadManager
 
         string response = await clientPublic.GetStringAsync($"https://api-v2.ddownload.com/api/file/info?key={apiKey}&file_code={Id}");
         JObject jresp = JObject.Parse(response);
-        item.Name = jresp["result"][0]["name"].ToString();
         item.IsOnline = jresp["result"][0]["status"].ToString() == "200";
-        item.Size = int.Parse(jresp["result"][0]["size"].ToString());
+        item.Downloader = "ddl";
+        item.Url = "https://ddownload.com/" + Id;
+        if(item.IsOnline)
+        {
+            item.Name = jresp["result"][0]["name"].ToString();
+            item.Size = int.Parse(jresp["result"][0]["size"].ToString());
+        }
 
         return item;
     }
 
-    public Task<Stream> GetDownloadStream(object item)
+    public async Task<Stream> GetDownloadStream(DownloadItem item, AccountProfile profile)
     {
-        return null;
+        HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
+        Stream s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+        return s;
     }
 
     public async Task GetAccounInfo(AccountProfile acc)
@@ -80,7 +88,7 @@ public class ddlDownloader : IDownloadManager
         acc.Model.ValidTill = DateTime.Parse(validdate);
 
         reg = new Regex("<div class=\"price\"><sup>MB</sup>([0-9]+)</div>");
-        float traffic1 = float.Parse(reg.Match(profileStr).Groups[1].Value.Trim().Replace('.', ',')) / 1024;
+        float traffic1 = float.Parse(reg.Match(profileStr).Groups[1].Value.Trim().Replace('.', ',')) * 1024 * 1024;
         float traffic7 = 700 - traffic1;
 
         acc.Model.TrafficLeft = traffic1;

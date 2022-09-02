@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json.Linq;
-using ShareLoader.CNL.Models;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
+using ShareLoader.CNL.Classes;
+using ShareLoader.Share;
 
 namespace ShareLoader.CNL.Controllers;
 
@@ -16,7 +14,6 @@ public class flashController : Controller
         _logger = logger;
     }
 
-    public static string MainUrl { get; set; } = "";
     public static bool updated = false;
 
     static CheckViewModel model;
@@ -29,27 +26,16 @@ public class flashController : Controller
             updated = false;
         }
 
+        string host = SettingsHelper.GetSetting("host");
+        string download = SettingsHelper.GetSetting("download");
 
-        if(System.IO.File.Exists("settings.txt"))
-        {
-            string defHost = System.IO.File.ReadAllText("settings.txt");
-            MainUrl = defHost;
-            ViewData["MainUrl"] = defHost;
-        }
-
-        if(string.IsNullOrEmpty(MainUrl))
+        if(string.IsNullOrEmpty(host))
         {
             HttpClient client = new HttpClient();
             List<string> hosts = new List<string>() { 
                 "http://localhost:5162", 
                 "http://qnap:5162" 
             };
-            if(System.IO.File.Exists("settings.txt"))
-            {
-                string defHost = System.IO.File.ReadAllText("settings.txt");
-                if(!hosts.Contains(defHost))
-                    hosts.Add(defHost);
-            }
             foreach(string url in hosts)
             {
                 try{
@@ -58,23 +44,32 @@ public class flashController : Controller
                     {
                         ViewData["auto"] = "true";
                         ViewData["updated"] = "false";
-                        MainUrl = url;
+                        host = url;
+                        SettingsHelper.SetSetting("host", url);
+                        BackgroundWatcher.Instance.StartWatcher();
                         break;
                     }
                 } catch {}
             }
         }
+        if(string.IsNullOrEmpty(download))
+        {
+            download = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
+            SettingsHelper.SetSetting("download", download);
+            BackgroundWatcher.Instance.StartWatcher();
+        }
 
-        ViewData["MainUrl"] = MainUrl;
+        ViewData["MainUrl"] = host;
+        ViewData["DownloadPath"] = download;
         return View();
     }
 
     [HttpPost]
-    public IActionResult Settings(string url)
+    public IActionResult Settings(string url, string download)
     {
-        MainUrl = url;
-        System.IO.File.WriteAllText("settings.txt", MainUrl);
-        ViewData["MainUrl"] = MainUrl;
+        SettingsHelper.SetSetting("host", url);
+        SettingsHelper.SetSetting("download", download);
+        BackgroundWatcher.Instance.StartWatcher();
         updated = true;
         return RedirectToAction("Settings");
     }
@@ -89,8 +84,6 @@ public class flashController : Controller
         string package = Request.Form["package"];
         string crypted = Request.Form["crypted"];
 
-        byte[] dataByte = Convert.FromBase64String(crypted);
-
         jk = jk.ToUpper();
         string decKey = "";
         for (int i = 0; i < jk.Length; i += 2)
@@ -98,60 +91,24 @@ public class flashController : Controller
             decKey += (char)Convert.ToUInt16(jk.Substring(i, 2), 16);
         }
 
-        string rawLinks = "";
-
-        using (Aes aesAlg = Aes.Create())
-        {
-            aesAlg.Key = System.Text.Encoding.ASCII.GetBytes(decKey);
-            aesAlg.IV = System.Text.Encoding.ASCII.GetBytes(decKey);
-            aesAlg.Padding = PaddingMode.None;
-            aesAlg.Mode = CipherMode.CBC;
-            ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV);
-
-            using (MemoryStream msDecrypt = new MemoryStream(dataByte))
-            {
-                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
-                {
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
-                    {
-                        rawLinks = srDecrypt.ReadToEnd();
-                    }
-                }
-            }
-        }
-
-        Regex rgx = new Regex("\u0000+$");
-        rawLinks = rgx.Replace(rawLinks, "");
-        string[] links = rawLinks.Split("\r\n");
-
-
+        string[] links = DecryptHelper.Decrypt(Convert.FromBase64String(crypted), decKey).Split("\r\n");
 
         model = new CheckViewModel() { 
             Name = package,
-            RawLinks = string.Join(",", links),
-            RawLinksCount = links.Count()
+            RawLinks = string.Join(",", links)
         };
 
-        Match m = new Regex(@"[a-z \.\\\/\(\-]((19|20)[0-9]{2})[a-z \.\\\/\)\-]").Match(model.Name);
-
-        m = new Regex(@"S([0-9]{1,2})[a-z \.\\\/\)\-]").Match(model.Name);
-        if (m.Success)
-        {
-            string search = model.Name.Substring(0, model.Name.LastIndexOf(m.Value)).Replace('.', ' ');
-            if (search.EndsWith(' '))
-                search = search.Substring(0, search.ToString().Length - 1);
-            model.Search = search;
-            model.Type = DownloadType.Soap;
-        }
+        SearchHelper.GetSearch(model);
 
         HttpClient client = new HttpClient();
         var json = Newtonsoft.Json.JsonConvert.SerializeObject(model);
         var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(json);
         string linksb64 = System.Convert.ToBase64String(plainTextBytes);
+        string host = SettingsHelper.GetSetting("host");
 
-        var res = await client.GetStringAsync(MainUrl + "/Downloads/ApiAdd?links=" + linksb64);
+        var res = await client.GetStringAsync(host + "/Downloads/ApiAdd?links=" + linksb64);
 
-        var ps = new ProcessStartInfo(MainUrl + "/Downloads/Add")
+        var ps = new ProcessStartInfo(host + "/Downloads/Add")
         { 
             UseShellExecute = true, 
             Verb = "open" 
@@ -161,25 +118,18 @@ public class flashController : Controller
         return Ok();
     }
 
-    public IActionResult check() 
+    public IActionResult error(int id)
     {
-        return View(model);
-    }
-
-    public async Task<IActionResult> itemInfo(string Id, string domain)
-    {
-        ItemModel item = new ItemModel() { Id = Id };
-        HttpClient clientPublic = new HttpClient();
-
-        if(domain == "ddownload.com")
+        switch(id)
         {
-            string response = await clientPublic.GetStringAsync("https://api-v2.ddownload.com/api/file/info?key=86749xuhs96bb63rc55kv&file_code=" + Id);
-            JObject jresp = JObject.Parse(response);
-            item.Name = jresp["result"][0]["name"].ToString();
-            item.IsOnline = jresp["result"][0]["status"].ToString() == "200";
-            item.Size = int.Parse(jresp["result"][0]["size"].ToString());
-        }
+            case 1:
+                ViewData["msg"] = "Der angegebene Host ist nicht erreichbar.";
+                break;
 
-        return Ok(item);
+            default:
+                ViewData["msg"] = "Es trat ein unbekannter Fehler auf.";
+                break;
+        }
+        return View();
     }
 }

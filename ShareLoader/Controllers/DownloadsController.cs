@@ -4,6 +4,7 @@ using ShareLoader.Classes;
 using ShareLoader.Data;
 using ShareLoader.Manager;
 using ShareLoader.Models;
+using ShareLoader.Share;
 using System.Text.RegularExpressions;
 
 namespace ShareLoader.Controllers;
@@ -13,7 +14,7 @@ public class DownloadsController : Controller
     private readonly DownloadContext _context;
     private readonly ILogger<DownloadsController> _logger;
     
-    public static CheckViewModel latestCheck;
+    public static CheckViewModel? latestCheck;
 
     public DownloadsController(DownloadContext context, ILogger<DownloadsController> logger)
     {
@@ -32,41 +33,60 @@ public class DownloadsController : Controller
 
         ViewData["OMDB_APIKEY"] = EnvironmentHelper.GetVariable("OMDB_APIKEY");
 
-
-        Match m = new Regex(@"[a-z \.\\\/\(\-]((19|20)[0-9]{2})[a-z \.\\\/\)\-]").Match(latestCheck.Name);
-
-        if (m.Success)
-        {
-            string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Groups[1].Value) - 1).Replace('.', ' ');
-            if (search.EndsWith(' '))
-                search = search.Substring(0, search.ToString().Length);
-            latestCheck.Search = search;
-            latestCheck.Type = DownloadType.Movie;
-        }
-        else
-        {
-            m = new Regex("(English|German)").Match(latestCheck.Name);
-            if (m.Success)
-            {
-                string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Value)).Replace('.', ' ');
-                if (search.EndsWith(' '))
-                    search = search.Substring(0, search.ToString().Length - 1);
-                latestCheck.Search = search;
-                latestCheck.Type = DownloadType.Movie;
-            }
-        }
-
-        m = new Regex(@"S([0-9]{1,2})[a-z \.\\\/\)\-]").Match(latestCheck.Name);
-        if (m.Success)
-        {
-            string search = latestCheck.Name.Substring(0, latestCheck.Name.LastIndexOf(m.Value)).Replace('.', ' ');
-            if (search.EndsWith(' '))
-                search = search.Substring(0, search.ToString().Length - 1);
-            latestCheck.Search = search;
-            latestCheck.Type = DownloadType.Soap;
-        }
-
         return View(latestCheck);
+    }
+
+    [HttpPost]
+    public IActionResult Add(CheckViewModel model)
+    {
+        DownloadGroup group = new DownloadGroup(model);
+        _context.Groups.Add(group);
+        _context.SaveChanges();
+
+        foreach(ItemModel item in model.Links)
+        {
+            DownloadItem ditem = new DownloadItem(item);
+            ditem.DownloadGroupID = group.Id;
+            _context.Items.Add(ditem);
+        }
+
+        _context.SaveChanges();
+        return RedirectToAction("Detail", new { id = group.Id });
+    }
+
+    public IActionResult Reset(int id)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
+        if(group == null) return NotFound();
+
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string groupPath = System.IO.Path.Combine(downloadPath, group.Id.ToString());
+        //TODO stop download
+        System.IO.Directory.Delete(groupPath, true);
+
+        foreach(DownloadItem item in _context.Items.Where(i => i.DownloadGroupID == group.Id))
+        {
+            item.State = States.Waiting;
+            _context.Items.Update(item);
+        }
+        _context.SaveChanges();
+        return RedirectToAction("Detail", new { id = group.Id });
+    }
+
+    public IActionResult ResetItem(int id)
+    {
+        DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
+        if(item == null) return NotFound();
+        item.State = States.Waiting;
+        _context.Items.Update(item);
+        _context.SaveChanges();
+        
+        //TODO stop download
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
+        if(System.IO.File.Exists(filePath))
+            System.IO.File.Delete(filePath);
+        return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
 
     public async Task<IActionResult> GetItemInfo(string url)
@@ -77,18 +97,44 @@ public class DownloadsController : Controller
         return Ok(item);
     }
 
-    public IActionResult Delete(int Id)
+    public IActionResult GetGroupsInfo()
     {
-        DownloadGroup group = _context.Groups.SingleOrDefault(g => g.Id == Id);
+        List<GroupInfo> infos = new List<GroupInfo>();
+        foreach(DownloadGroup group in _context.Groups)
+        {
+            GroupInfo info = new GroupInfo();
+            info.Id = group.Id;
+            info.Downloaded = _context.Items.Count(i => i.DownloadGroupID == group.Id && i.State == States.Downloaded);
+            info.Extracted = _context.Items.Count(i => i.DownloadGroupID == group.Id && i.State == States.Extracted);
+            info.Finished = _context.Items.Count(i => i.DownloadGroupID == group.Id && i.State == States.Finished);
+            info.Error = _context.Items.Count(i => i.DownloadGroupID == group.Id && i.State == States.Error);
+            infos.Add(info);
+        }
+        return Ok(infos);
+    }
+
+    public async Task<IActionResult> Delete(int Id)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == Id);
         if(group == null) return NotFound();
         _context.Groups.Remove(group);
+        IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id).ToList();
+        _context.Items.RemoveRange(items);
         _context.SaveChanges();
+
+
+        foreach(DownloadItem item in items)
+            await Background.BackgroundTasks.Instance.StopDownload(item);
+            
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        System.IO.Directory.Delete(System.IO.Path.Combine(downloadPath, group.Id.ToString()), true);
+
         return RedirectToAction("Index");
     }
 
     public IActionResult Detail(int Id)
     {
-        DownloadGroup group = _context.Groups.SingleOrDefault(g => g.Id == Id);
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == Id);
         if(group == null) return NotFound();
 
         IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id);
@@ -100,6 +146,49 @@ public class DownloadsController : Controller
         ViewData["Items"] = items;
 
         return View(group);
+    }
+
+    public IActionResult Pause(int id)
+    {
+        return RedirectToAction("Detail", new { id = id });
+    }
+
+    public IActionResult PauseItem(int id)
+    {
+        DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
+        if(item == null) return NotFound();
+        if(item.State == States.Downloading) return NotFound("DownloadItem kann nicht zurück gesetzt werden, solange es downloaded.");
+        if(item.State == States.Extracting) return NotFound("DownloadItem kann nicht zurück gesetzt werden, solange es entpackt.");
+        if(item.State == States.Moving) return NotFound("DownloadItem kann nicht zurück gesetzt werden, solange es verschoben wird.");
+        if(item.State == States.Finished) return NotFound("DownloadItem kann nicht zurück gesetzt werden, es ist fertig.");
+
+        item.State = States.Paused;
+        _context.Items.Update(item);
+        _context.SaveChanges();
+
+        return RedirectToAction("Detail", new { id = item.DownloadGroupID });
+    }
+
+    public async Task<IActionResult> StopItem(int id)
+    {
+        DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
+        if(item == null) return NotFound();
+
+        if(item.State == States.Downloading)
+        {
+            await Background.BackgroundTasks.Instance.StopDownload(item);
+        } else if(item.State == States.Extracting)
+        {
+
+        } else {
+             return NotFound("DownloadItem kann nur gestoppt werden, wenn es heruntergeladen oder entpackt wird.");
+        }
+
+        item.State = States.Error;
+        _context.Items.Update(item);
+        _context.SaveChanges();
+
+        return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
 
     public IActionResult ApiTest()

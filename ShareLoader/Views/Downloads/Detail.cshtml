@@ -3,23 +3,44 @@
     ViewData["Title"] = "Downloads " + Model.Name;
 }
 
-<p>
+<div style="margin: 10px">
     Passwort: @Model.Password <br />
     Dateien: @Model.ItemsCount <br />
     Sortiername: @Model.Sort
 </p>
 
+<div style="margin: 10px">
+    <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@Model.Id"><i class="material-icons">delete_forever</i></a>
+    <a asp-controller="Downloads" asp-action="Reset" asp-route-id="@Model.Id"><i class="material-icons">restart_alt</i></a>
+    <a asp-controller="Downloads" asp-action="Pause" asp-route-id="@Model.Id"><i class="material-icons">pause_circle_outline</i></a>
+</div>
+
 
 <ul class="collection">
     @foreach(DownloadItem item in ViewData["Items"] as IEnumerable<DownloadItem>)
     {
-        <li data-id="@item.Id" class="collection-item avatar">
-            <i class="material-icons circle">hourglass_bottom</i>
+        <li data-id="@item.Id" data-group="@item.GroupID" class="collection-item avatar">
+            <i class="material-icons circle @item.GetColor()">@item.GetImage()</i>
             <span class="title">@item.Name</span>
             <p>
                 Größe: @item.GetSize()
             </p>
-            <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id" class="secondary-content"><i class="material-icons">delete_forever</i></a>
+            <div class="progress" style="display: none">
+                <div class="determinate" style="width: 0%"></div>
+            </div>
+
+            <div class="secondary-content">
+                <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@Model.Id"><i class="material-icons">pause_circle_outline</i></a>
+                <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id"><i class="material-icons">pause_circle_outline</i></a>
+                <a asp-controller="Downloads" asp-action="ResetItem" asp-route-id="@item.Id"><i class="material-icons">restart_alt</i></a>
+                <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id"><i class="material-icons">delete_forever</i></a>
+            </div>
         </li>
     }
 </ul>
+
+@section Scripts {
+    <script>
+        let groupId = "@Html.Raw(Model.Id)";
+    </script>
+}
