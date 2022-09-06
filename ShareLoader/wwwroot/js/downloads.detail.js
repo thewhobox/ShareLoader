@@ -36,89 +36,77 @@ function connect() {
 
         console.log(resp);
         
-        /*
-            case States.Finished:
-                return "green";
-
-            case States.Downloaded:
-                return "orange darken-2";
-
-            default:
-            case States.Waiting:
-                return "gray darken-1";
-
-            case States.Downloading:
-                return "orange lighten-2";
-
-            case States.Error:
-                return "red";
-
-            case States.Extracting:
-                return "purple lighten-2";
-
-            case States.Extracted:
-                return "purple darken-2";
-
-            case States.Moving:
-                return "brown lighten-1";*/
-
         switch (resp.type) {
             case "error":
                 setIcon(resp.id, "warning_amber");
                 setColor(resp.id, "red");
                 setProgress(resp.id, 100);
-                //setText(resp.id, "Error");
+                setVis(resp.id, "pause", false);
+                setVis(resp.id, "stop", false);
                 break;
             case "reset":
                 setIcon(resp.id, "mif-hour-glass fg-black");
                 setColor(resp.id, "gray darken-1");
                 setProgress(resp.id, 0);
-                //setText(resp.id, "Zurückgesetzt");
+                setVis(resp.id, "pause", true);
+                setVis(resp.id, "stop", false);
                 break;
             case "check":
                 setIcon(resp.id, "mif-spinner3 fg-dargGray ani-spin");
                 setPbCol(resp.id, "yellow");
                 setPbVal(resp.id, 100);
-                setText(resp.id, "Check");
                 break;
             case "extract":
                 setIconGroup(resp.group, "folder_zip");
                 setColorGroup(resp.group, "purple lighten-2");
                 setProgress(resp.id, resp.perc);
-                //setText(resp.id, "Extracting");
+                setVis(resp.id, "pause", false);
+                setVis(resp.id, "stop", true);
                 break;
             case "downloaded":
                 setIcon(resp.id, "file_download_done");
                 setColor(resp.id, "orange darken-2");
                 setProgress(resp.id, -1);
-                //setText(resp.id, "Downloaded");
+                setVis(resp.id, "pause", true);
+                setVis(resp.id, "stop", false);
                 break;
             case "extracted":
                 setIconGroup(resp.group, "folder");
                 setColorGroup(resp.group, "purple darken-2");
                 setProgressGroup(resp.group, -1);
-                //setTexts(resp.id, "Extracted");
+                setVis(resp.id, "pause", true);
+                setVis(resp.id, "stop", false);
                 break;
             case "moving":
                 setIconGroup(resp.group, "copy_all");
                 setColorGroup(resp.group, "brown lighten-1");
                 setProgressGroup(resp.group, -1);
-                //setTexts(resp.id, "Moving");
+                setVis(resp.id, "pause", false);
+                setVis(resp.id, "stop", false);
                 break;
             case "fin":
                 setIconGroup(resp.group, "task_alt");
                 setColorGroup(resp.group, "green");
                 setProgressGroup(resp.group, -1);
-                //setTexts(resp.id, "");
+                setVis(resp.id, "pause", false);
+                setVis(resp.id, "stop", false);
                 break;
             case "info":
                 setIcon(resp.id, "downloading");
                 setColor(resp.id, "orange lighten-2");
                 setProgress(resp.id, resp.perc);
-                //setText(resp.id).html(resp.speed);
+                setVis(resp.id, "pause", false);
+                setVis(resp.id, "stop", true);
                 break;
         }
     };
+}
+
+function setVis(id, action, isVisible) {
+    if(isVisible)
+        $("li[data-id=" + id + "] a[data-action=" + action + "]").removeClass("hide");
+    else
+        $("li[data-id=" + id + "] a[data-action=" + action + "]").addClass("hide");
 }
 
 function setIcon(id, icon) {

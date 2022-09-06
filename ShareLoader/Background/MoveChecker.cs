@@ -11,7 +11,7 @@ namespace ShareLoader.Background;
 public class MoveChecker
 {
     public DateTime LastChecked { get; set; } = DateTime.Now;
-    private DownloadItem _currentItem;
+    private DownloadItem? _currentItem;
     private DownloadType _currentType;
     private string _currentSort;
     private List<DownloadItem> _items;
@@ -81,13 +81,13 @@ public class MoveChecker
         switch(_currentType)
         {
             case DownloadType.Movie:
-                await MoveMovie();
+                MoveMovie();
                 break;
             case DownloadType.Soap:
-                await MoveSoap();
+                MoveSoap();
                 break;
             case DownloadType.Other:
-                await MoveOther();
+                MoveOther();
                 break;
         }
         
@@ -96,12 +96,38 @@ public class MoveChecker
         System.Console.WriteLine("Moving finished");
     }
 
-    private async Task MoveMovie()
+    private void MoveMovie()
     {
+        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        string pathFrom = System.IO.Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "extracted", _currentItem.GroupID.ToString());
+        string[] files = Directory.GetFiles(pathFrom, "*.mkv");
+        string fileToMove = "";
 
+        foreach (string file in files)
+        {
+            if (Path.GetFileName(file).Contains("sample"))
+                continue;
+
+            fileToMove = file;
+            break;
+        }
+
+        string pathTo = Path.Combine(settings.MoveFolder, "Filme");
+        string fileTo = Path.Combine(pathTo, _currentSort + Path.GetExtension(fileToMove));
+
+        if (!Directory.Exists(pathTo))
+            Directory.CreateDirectory(pathTo);
+        
+        try
+        {
+            File.Move(fileToMove, fileTo, true);
+        } catch(Exception e)
+        {
+            Console.WriteLine("Verschieben: " + e.Message);
+        }
     }
 
-    private async Task MoveSoap()
+    private void MoveSoap()
     {
         bool dyn = _currentSort.EndsWith("dynamisch");
 
@@ -142,9 +168,7 @@ public class MoveChecker
 
             try
             {
-                if (File.Exists(endpath))
-                    File.Delete(endpath);
-                File.Move(file, endpath);
+                File.Move(file, endpath, true);
             }
             catch (Exception e)
             {
@@ -153,9 +177,25 @@ public class MoveChecker
         }
     }
 
-    public async Task MoveOther()
+    public void MoveOther()
     {
+        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        string pathFrom = System.IO.Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "extracted", _currentItem.GroupID.ToString());
+        string[] files = Directory.GetFiles(pathFrom);
+        string pathTo = Path.Combine(settings.MoveFolder, "Other");
+        if(!string.IsNullOrEmpty(_currentSort))
+        {
+            pathTo = Path.Combine(pathTo, _currentSort);
+        }
 
+        if (!Directory.Exists(pathTo))
+            Directory.CreateDirectory(pathTo);
+
+        foreach (string file in files)
+        {
+            string fileTo = Path.Combine(pathTo, Path.GetFileName(file));
+            File.Move(file, fileTo, true);
+        }
     }
 
     

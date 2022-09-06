@@ -54,22 +54,23 @@ public class DownloadsController : Controller
         return RedirectToAction("Detail", new { id = group.Id });
     }
 
-    public IActionResult Reset(int id)
+    public async Task<IActionResult> Reset(int id)
     {
         DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
         if(group == null) return NotFound();
-
-        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
-        string groupPath = System.IO.Path.Combine(downloadPath, group.Id.ToString());
-        //TODO stop download
-        System.IO.Directory.Delete(groupPath, true);
 
         foreach(DownloadItem item in _context.Items.Where(i => i.DownloadGroupID == group.Id))
         {
             item.State = States.Waiting;
             _context.Items.Update(item);
+            await Background.BackgroundTasks.Instance.StopDownload(item);
         }
         _context.SaveChanges();
+
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string groupPath = System.IO.Path.Combine(downloadPath, group.Id.ToString());
+        System.IO.Directory.Delete(groupPath, true);
+
         return RedirectToAction("Detail", new { id = group.Id });
     }
 
@@ -132,6 +133,23 @@ public class DownloadsController : Controller
         return RedirectToAction("Index");
     }
 
+    public async Task<IActionResult> DeleteItem(int Id)
+    {
+        DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == Id);
+        if(item == null) return NotFound();
+
+        await Background.BackgroundTasks.Instance.StopDownload(item);
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
+        if(System.IO.File.Exists(filePath))
+            System.IO.File.Delete(filePath);
+
+        _context.Items.Remove(item);
+        _context.SaveChanges();
+
+        return RedirectToAction("Detail", new { id = Id });
+    }
+
     public IActionResult Detail(int Id)
     {
         DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == Id);
@@ -150,6 +168,11 @@ public class DownloadsController : Controller
 
     public IActionResult Pause(int id)
     {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
+        if(group == null) return NotFound();
+        group.State = GroupStates.Paused;
+        _context.Groups.Update(group);
+        _context.SaveChanges();
         return RedirectToAction("Detail", new { id = id });
     }
 
@@ -168,6 +191,60 @@ public class DownloadsController : Controller
 
         return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
+    
+    public IActionResult UnPause(int id)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
+        if(group == null) return NotFound();
+        group.State = GroupStates.Normal;
+
+        _context.Groups.Update(group);
+        _context.SaveChanges();
+        return RedirectToAction("Detail", new { id = id });
+    }
+
+    public IActionResult UnPauseItem(int id)
+    {
+        DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
+        if(item == null) return NotFound();
+
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
+        string extractPath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "extracted", item.GroupID.ToString());
+
+        if(!System.IO.File.Exists(filePath))
+        {
+            item.State = States.Waiting;
+        } else {
+            FileInfo info = new FileInfo(filePath);
+            if(info.Length == item.Size) {
+                bool flag = false;
+                if(System.IO.Directory.Exists(extractPath))
+                {
+                    foreach(string file in System.IO.Directory.GetFiles(extractPath))
+                    {
+                        info = new FileInfo(file);
+                        if(file.Length > (1024 * 1024))
+                        {
+                            flag = true;
+                            break;
+                        }
+                    }
+                }
+                if(flag)
+                    item.State = States.Extracted;
+                else
+                    item.State = States.Downloaded;
+            } else {
+                item.State = States.Waiting;
+            }
+        }
+
+        _context.Items.Update(item);
+        _context.SaveChanges();
+        return RedirectToAction("Detail", new { id = item.DownloadGroupID });
+    }
+
 
     public async Task<IActionResult> StopItem(int id)
     {
@@ -179,7 +256,7 @@ public class DownloadsController : Controller
             await Background.BackgroundTasks.Instance.StopDownload(item);
         } else if(item.State == States.Extracting)
         {
-
+            await Background.BackgroundTasks.Instance.StopExtract(item);
         } else {
              return NotFound("DownloadItem kann nur gestoppt werden, wenn es heruntergeladen oder entpackt wird.");
         }
@@ -194,22 +271,6 @@ public class DownloadsController : Controller
     public IActionResult ApiTest()
     {
         return Ok("ShareLoader");
-    }
-
-    //[HttpPost]
-    public IActionResult ApiAddTest(List<string> links)
-    {
-        links = new List<string>() {
-            "https://ddownload.com/oo2muu8db32u/WsmdS.web.18p.tscc.S04E01.part1.rar",
-            "https://ddownload.com/anedz7ctzci2/WsmdS.web.18p.tscc.S04E01.part2.rar",
-            "https://ddownload.com/3rvox4e181n6/WsmdS.web.18p.tscc.S04E01.part3.rar",
-            "https://ddownload.com/sswi6pbcdw6i/WsmdS.web.18p.tscc.S04E01.part4.rar"
-        };
-        latestCheck = new CheckViewModel() {
-            Name = "Wer.stiehlt.mir.die.Show.S02.WebHD.HDR",
-            RawLinks  = string.Join(',', links)
-        };
-        return RedirectToAction("Add");
     }
 
     public IActionResult ApiAdd(string links)

@@ -47,6 +47,13 @@
 
     <div class="row">
         <div class="input-field col s12">
+            <input asp-for="MaxDownloads" type="number" autocomplete="off" data-validate="required">
+            <label asp-for="MaxDownloads">Maximale anzahl an gleichzeitigen Downloads</label>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="input-field col s12">
             <button class="btn">Speichern</button>
         </div>
     </div>

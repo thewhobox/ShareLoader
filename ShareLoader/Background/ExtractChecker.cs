@@ -13,8 +13,9 @@ public class ExtractChecker
     public DateTime LastChecked { get; set; } = DateTime.Now;
     public bool isExtracting = false;
     public bool nothingToExtract = false;
-    private DownloadItem _currentItem;
+    private DownloadItem? _currentItem;
     private List<DownloadItem> _items;
+    private CancellationTokenSource _extractToken;
     private string _currentPassword;
     DownloadChecker download;
 
@@ -82,6 +83,7 @@ public class ExtractChecker
         System.Console.WriteLine("Extracting now: " + _currentItem.Name);
         ChangeItemState(States.Extracting);
         _ = SocketHelper.Instance.SendIDExtract(_currentItem);
+        _extractToken = new CancellationTokenSource();
 
         SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
         string fileDir = Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "files", _currentItem.Name);
@@ -97,12 +99,18 @@ public class ExtractChecker
 
         GetProgress(p);
 
-        await p.WaitForExitAsync();
+        await p.WaitForExitAsync(_extractToken.Token);
 
-        if(p.ExitCode != 0 || !foundError)
+        if(_extractToken.IsCancellationRequested)
+        {
+            p.Close();
+        }
+
+        if(p.ExitCode != 0 || foundError || _extractToken.IsCancellationRequested)
         {
             ChangeItemState(States.Error);
             _ = SocketHelper.Instance.SendIDError(_currentItem);
+            _currentItem = null;
             return;
         }
         
@@ -114,6 +122,16 @@ public class ExtractChecker
 
         ChangeItemState(States.Extracted);
         _ = SocketHelper.Instance.SendIDExtracted(_currentItem);
+        _currentItem = null;
+    }
+
+    public async Task StopExtract(DownloadItem item)
+    {
+        if(_currentItem == null || _currentItem.Id != item.Id || _extractToken == null) return;
+        _extractToken.Cancel();
+
+        while(_currentItem != null)
+            await Task.Delay(5);
     }
 
     private bool foundError = false;

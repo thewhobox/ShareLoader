@@ -53,14 +53,24 @@ public class ddlDownloader : IDownloadManager
 
     public async Task<Stream> GetDownloadStream(DownloadItem item, AccountProfile profile)
     {
-        HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
-        Stream s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+        Stream? s = null;
+        try {
+            HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
+            s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+        } catch{
+
+        }
         return s;
     }
 
     public async Task GetAccounInfo(AccountProfile acc)
     {
-        string profileStr = await acc.Client.GetStringAsync("https://ddownload.com/?op=my_account");
+        string profileStr = "";
+        try{
+            profileStr = await acc.Client.GetStringAsync("https://ddownload.com/?op=my_account");
+        } catch{
+            return;
+        }
 
         if (!profileStr.Contains("Affiliate link"))
         {

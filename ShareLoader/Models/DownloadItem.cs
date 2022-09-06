@@ -70,6 +70,9 @@ public class DownloadItem
 
             case States.Moving:
                 return "copy_all";
+
+            case States.Paused:
+                return "pause";
         }
     }
     

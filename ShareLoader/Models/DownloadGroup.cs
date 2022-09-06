@@ -16,6 +16,7 @@ public class DownloadGroup
     public DownloadType Type { get; set; }
     public string Sort { get; set; } = "";
     public int ItemsCount { get; set; }
+    public GroupStates State { get; set; }
 
     public DownloadGroup() { }
 
@@ -27,4 +28,24 @@ public class DownloadGroup
         ItemsCount = model.Links.Count;
         Type = model.Type;
     }
+
+    public string GetIcon()
+    {
+        switch(State)
+        {
+            case GroupStates.Normal:
+                return "not_started";
+
+            case GroupStates.Paused:
+                return "pause_circle";
+        }
+
+        return "psychology_alt";
+    }
+}
+
+public enum GroupStates 
+{
+    Normal,
+    Paused
 }

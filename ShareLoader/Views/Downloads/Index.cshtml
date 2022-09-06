@@ -9,7 +9,12 @@
     @foreach(DownloadGroup group in Model)
     {
         <li data-id="@group.Id" class="collection-item avatar">
-            <i class="material-icons circle">hourglass_bottom</i>
+            @if(group.State == GroupStates.Paused)
+            {
+                <i class="material-icons circle grey">@group.GetIcon()</i>
+            } else {
+                <i class="material-icons circle green">@group.GetIcon()</i>
+            }
             <span class="title"><a asp-controller="Downloads" asp-action="Detail" asp-route-id="@group.Id">@group.Name</a></span>
             <p>
                 Downloaded: <span class="countD">-</span>/@group.ItemsCount<br />

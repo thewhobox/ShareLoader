@@ -61,10 +61,10 @@ public class AccountChecker
 
     }
 
-    public AccountProfile GetProfile(DownloadItem item)
+    public AccountProfile? GetProfile(DownloadItem item)
     {
         //TODO also check if enough traffic left
-        AccountProfile profile = Profiles.Values.SingleOrDefault(p => p.Model.Hoster == item.Hoster);
+        AccountProfile? profile =  Profiles.Values.FirstOrDefault(p => p.Model.Hoster == item.Hoster && p.Model.IsPremium && p.Model.TrafficLeft > item.Size);
         return profile;
     }
 

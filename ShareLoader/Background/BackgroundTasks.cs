@@ -14,12 +14,29 @@ public class BackgroundTasks : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Instance = this;
-        System.Console.WriteLine("Starte Backgrounder");
+        System.Console.WriteLine("Starte BackgroundTasker");
+
+
+        using(Data.DownloadContext context = new Data.DownloadContext())
+        {
+            foreach(DownloadItem item in context.Items.Where(i => i.State == States.Downloading || i.State == States.Extracting || i.State == States.Moving).ToList())
+            {
+                item.State = States.Error;
+                context.Items.Update(item);
+            }
+            context.SaveChanges();
+        }
+
         account = new AccountChecker();
         download = new DownloadChecker(account);
         extract = new ExtractChecker(download);
         move = new MoveChecker(download, extract);
         await Check(stoppingToken);
+    }
+
+    public async Task StopExtract(DownloadItem item)
+    {
+        await extract.StopExtract(item);
     }
 
     public async Task StopDownload(DownloadItem item)
@@ -40,6 +57,11 @@ public class BackgroundTasks : BackgroundService
             {
                 Console.WriteLine("DownloadChecker neu gestartet");
                 download = new DownloadChecker(account);
+            }
+            if(extract.LastChecked + TimeSpan.FromMinutes(10) < DateTime.Now)
+            {
+                Console.WriteLine("ExtractChecker neu gestartet");
+                extract = new ExtractChecker(download);
             }
 
             await Task.Delay(TimeSpan.FromMinutes(5), stoppingToken);

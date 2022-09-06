@@ -1,6 +1,9 @@
 @model DownloadGroup
 @{
     ViewData["Title"] = "Downloads " + Model.Name;
+
+    if(Model.State == GroupStates.Paused)
+        ViewData["Title"] = "Pausiert - " + ViewData["Title"];
 }
 
 <div style="margin: 10px">
@@ -12,7 +15,12 @@
 <div style="margin: 10px">
     <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@Model.Id"><i class="material-icons">delete_forever</i></a>
     <a asp-controller="Downloads" asp-action="Reset" asp-route-id="@Model.Id"><i class="material-icons">restart_alt</i></a>
-    <a asp-controller="Downloads" asp-action="Pause" asp-route-id="@Model.Id"><i class="material-icons">pause_circle_outline</i></a>
+    @if(Model.State == GroupStates.Normal)
+    {
+        <a asp-controller="Downloads" asp-action="Pause" asp-route-id="@Model.Id"><i class="material-icons">pause_circle</i></a>
+    } else {
+        <a asp-controller="Downloads" asp-action="UnPause" asp-route-id="@Model.Id"><i class="material-icons">play_circle</i></a>
+    }
 </div>
 
 
@@ -30,8 +38,25 @@
             </div>
 
             <div class="secondary-content">
-                <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@Model.Id"><i class="material-icons">pause_circle_outline</i></a>
-                <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id"><i class="material-icons">pause_circle_outline</i></a>
+                @if(item.State != States.Paused)
+                {
+                    @if(item.State == States.Downloading || item.State == States.Extracting || item.State == States.Finished || item.State == States.Error)
+                    {
+                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause" class="hide"><i class="material-icons">pause_circle</i></a>
+                    } else {
+                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause"><i class="material-icons">pause_circle</i></a>
+                    }
+                } else {
+                    <a asp-controller="Downloads" asp-action="UnPauseItem" asp-route-id="@item.Id"><i class="material-icons">play_circle</i></a>
+                }
+
+                @if(item.State == States.Downloading || item.State == States.Extracting)
+                {
+                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop"><i class="material-icons">stop_circle</i></a>
+                } else {
+                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop" class="hide"><i class="material-icons">stop_circle</i></a>
+                }
+
                 <a asp-controller="Downloads" asp-action="ResetItem" asp-route-id="@item.Id"><i class="material-icons">restart_alt</i></a>
                 <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id"><i class="material-icons">delete_forever</i></a>
             </div>
