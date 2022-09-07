@@ -54,3 +54,12 @@ function checkGroupsInfo()
 
     setTimeout(checkGroupsInfo, 10000);
 }
+
+function startAddFile()
+{
+    $("#InputAddFile").click();
+}
+
+function changedAddFile() {
+    $("#FormAddFile").submit();
+}

@@ -51,12 +51,31 @@ public class ddlDownloader : IDownloadManager
         return item;
     }
 
-    public async Task<Stream> GetDownloadStream(DownloadItem item, AccountProfile profile)
+    public async Task<bool> CheckStreamRange(DownloadItem item, AccountProfile profile)
+    {
+        try {
+            HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
+            resp = await profile.Client.GetAsync(resp.Headers.Location, HttpCompletionOption.ResponseHeadersRead);
+            return resp.Headers.AcceptRanges?.Contains("bytes") == true;
+        } catch{
+
+        }
+        return false;
+    }
+
+    public async Task<Stream> GetDownloadStream(DownloadItem item, AccountProfile profile, long start = 0)
     {
         Stream? s = null;
         try {
             HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
-            s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+            if(start == 0)
+                s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+            else {
+                HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, resp.Headers.Location);
+                req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(start, item.Size);
+                resp = await profile.Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
+                s = resp.Content.ReadAsStream();
+            }
         } catch{
 
         }

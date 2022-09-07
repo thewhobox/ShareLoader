@@ -50,6 +50,7 @@ function connect() {
                 setProgress(resp.id, 0);
                 setVis(resp.id, "pause", true);
                 setVis(resp.id, "stop", false);
+                setVis(resp.id, "delete", false);
                 break;
             case "check":
                 setIcon(resp.id, "mif-spinner3 fg-dargGray ani-spin");
@@ -62,6 +63,7 @@ function connect() {
                 setProgress(resp.id, resp.perc);
                 setVis(resp.id, "pause", false);
                 setVis(resp.id, "stop", true);
+                setVis(resp.id, "delete", false);
                 break;
             case "downloaded":
                 setIcon(resp.id, "file_download_done");
@@ -69,13 +71,15 @@ function connect() {
                 setProgress(resp.id, -1);
                 setVis(resp.id, "pause", true);
                 setVis(resp.id, "stop", false);
+                setVis(resp.id, "delete", true);
                 break;
             case "extracted":
                 setIconGroup(resp.group, "folder");
                 setColorGroup(resp.group, "purple darken-2");
                 setProgressGroup(resp.group, -1);
-                setVis(resp.id, "pause", true);
-                setVis(resp.id, "stop", false);
+                setVisGroup(resp.group, "pause", true);
+                setVisGroup(resp.group, "stop", false);
+                setVisGroup(resp.group, "delete", false);
                 break;
             case "moving":
                 setIconGroup(resp.group, "copy_all");
@@ -83,13 +87,15 @@ function connect() {
                 setProgressGroup(resp.group, -1);
                 setVis(resp.id, "pause", false);
                 setVis(resp.id, "stop", false);
+                setVis(resp.id, "delete", false);
                 break;
             case "fin":
                 setIconGroup(resp.group, "task_alt");
                 setColorGroup(resp.group, "green");
                 setProgressGroup(resp.group, -1);
-                setVis(resp.id, "pause", false);
-                setVis(resp.id, "stop", false);
+                setVisGroup(resp.group, "pause", false);
+                setVisGroup(resp.group, "stop", false);
+                setVisGroup(resp.group, "delete", false);
                 break;
             case "info":
                 setIcon(resp.id, "downloading");
@@ -97,6 +103,7 @@ function connect() {
                 setProgress(resp.id, resp.perc);
                 setVis(resp.id, "pause", false);
                 setVis(resp.id, "stop", true);
+                setVis(resp.id, "delete", false);
                 break;
         }
     };
@@ -107,6 +114,13 @@ function setVis(id, action, isVisible) {
         $("li[data-id=" + id + "] a[data-action=" + action + "]").removeClass("hide");
     else
         $("li[data-id=" + id + "] a[data-action=" + action + "]").addClass("hide");
+}
+
+function setVisGroup(id, action, isVisible) {
+    if(isVisible)
+        $("li[data-group=" + id + "] a[data-action=" + action + "]").removeClass("hide");
+    else
+        $("li[data-group=" + id + "] a[data-action=" + action + "]").addClass("hide");
 }
 
 function setIcon(id, icon) {

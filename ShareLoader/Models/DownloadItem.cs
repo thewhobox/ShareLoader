@@ -17,7 +17,7 @@ public class DownloadItem
     public int GroupID { get; set; } = -1;
     [MaxLength(150)]
     public string Url { get; set; }
-    public int Size { get; set; }
+    public long Size { get; set; }
     public States State { get; set; } = States.Waiting;
     [MaxLength(32)]
     public string MD5 { get; set; } = "";      

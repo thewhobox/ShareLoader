@@ -3,7 +3,11 @@
     ViewData["Title"] = "Downloads";
 }
 
+<a class="btn-floating btn-large waves-effect waves-light red" href="#" onclick="startAddFile(); return false;"><i class="material-icons">add</i></a>
 
+<form asp-controller="Downloads" asp-action="ApiFile" id="FormAddFile" method="post" enctype="multipart/form-data" class="hide">
+    <input name="file" type="file" id="InputAddFile" onchange="changedAddFile()" accept="*.dlc" />
+</form>
 
 <ul class="collection">
     @foreach(DownloadGroup group in Model)

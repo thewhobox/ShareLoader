@@ -9,17 +9,18 @@
 <div style="margin: 10px">
     Passwort: @Model.Password <br />
     Dateien: @Model.ItemsCount <br />
-    Sortiername: @Model.Sort
+    Sortiername: @Model.Sort <br />
+    Größe: @ViewData["totalSize"]
 </p>
 
 <div style="margin: 10px">
-    <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@Model.Id"><i class="material-icons">delete_forever</i></a>
-    <a asp-controller="Downloads" asp-action="Reset" asp-route-id="@Model.Id"><i class="material-icons">restart_alt</i></a>
+    <a asp-controller="Downloads" asp-action="Delete" asp-route-id="@Model.Id" title="Gruppe Löschen"><i class="material-icons">delete_forever</i></a>
+    <a asp-controller="Downloads" asp-action="Reset" asp-route-id="@Model.Id" title="Gruppe Zurücksetzen"><i class="material-icons">restart_alt</i></a>
     @if(Model.State == GroupStates.Normal)
     {
-        <a asp-controller="Downloads" asp-action="Pause" asp-route-id="@Model.Id"><i class="material-icons">pause_circle</i></a>
+        <a asp-controller="Downloads" asp-action="Pause" asp-route-id="@Model.Id" title="Pausieren"><i class="material-icons">pause_circle</i></a>
     } else {
-        <a asp-controller="Downloads" asp-action="UnPause" asp-route-id="@Model.Id"><i class="material-icons">play_circle</i></a>
+        <a asp-controller="Downloads" asp-action="UnPause" asp-route-id="@Model.Id" title="Fortsetzen"><i class="material-icons">play_circle</i></a>
     }
 </div>
 
@@ -42,23 +43,28 @@
                 {
                     @if(item.State == States.Downloading || item.State == States.Extracting || item.State == States.Finished || item.State == States.Error)
                     {
-                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause" class="hide"><i class="material-icons">pause_circle</i></a>
+                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause" title="Pausieren" class="hide"><i class="material-icons">pause_circle</i></a>
                     } else {
-                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause"><i class="material-icons">pause_circle</i></a>
+                        <a asp-controller="Downloads" asp-action="PauseItem" asp-route-id="@item.Id" data-action="pause" title="Pausieren"><i class="material-icons">pause_circle</i></a>
                     }
                 } else {
-                    <a asp-controller="Downloads" asp-action="UnPauseItem" asp-route-id="@item.Id"><i class="material-icons">play_circle</i></a>
+                    <a asp-controller="Downloads" asp-action="UnPauseItem" asp-route-id="@item.Id" title="Fortsetzen"><i class="material-icons">play_circle</i></a>
                 }
 
                 @if(item.State == States.Downloading || item.State == States.Extracting)
                 {
-                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop"><i class="material-icons">stop_circle</i></a>
+                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop" title="Anhalten"><i class="material-icons">stop_circle</i></a>
                 } else {
-                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop" class="hide"><i class="material-icons">stop_circle</i></a>
+                    <a asp-controller="Downloads" asp-action="StopItem" asp-route-id="@item.Id" data-action="stop" title="Anhalten" class="hide"><i class="material-icons">stop_circle</i></a>
                 }
 
-                <a asp-controller="Downloads" asp-action="ResetItem" asp-route-id="@item.Id"><i class="material-icons">restart_alt</i></a>
-                <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id"><i class="material-icons">delete_forever</i></a>
+                <a asp-controller="Downloads" asp-action="ResetItem" asp-route-id="@item.Id" title="Zurücksetzen"><i class="material-icons">restart_alt</i></a>
+                @if((bool)ViewData[item.ItemId] == true)
+                {
+                    <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id" data-action="delete" title="Datei löschen"><i class="material-icons">delete_forever</i></a>
+                } else {
+                    <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id" data-action="delete" title="Datei löschen" class="hide"><i class="material-icons">delete_forever</i></a>
+                }
             </div>
         </li>
     }

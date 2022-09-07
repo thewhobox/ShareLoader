@@ -54,6 +54,28 @@ public class DownloadsController : Controller
         return RedirectToAction("Detail", new { id = group.Id });
     }
 
+    public IActionResult Detail(int Id)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == Id);
+        if(group == null) return NotFound();
+
+        IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id);
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        long size = 0;
+        foreach(DownloadItem item in items)
+        {
+            size += item.Size;
+            ViewData[item.ItemId] = System.IO.File.Exists(System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name));
+        }
+
+        ViewData["totalSize"] = DownloadHelper.GetSizeString(size);
+        ViewData["Items"] = items;
+
+        return View(group);
+    }
+
+
+
     public async Task<IActionResult> Reset(int id)
     {
         DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
@@ -74,7 +96,7 @@ public class DownloadsController : Controller
         return RedirectToAction("Detail", new { id = group.Id });
     }
 
-    public IActionResult ResetItem(int id)
+    public async Task<IActionResult> ResetItem(int id)
     {
         DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
         if(item == null) return NotFound();
@@ -82,11 +104,8 @@ public class DownloadsController : Controller
         _context.Items.Update(item);
         _context.SaveChanges();
         
-        //TODO stop download
-        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
-        string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
-        if(System.IO.File.Exists(filePath))
-            System.IO.File.Delete(filePath);
+        await Background.BackgroundTasks.Instance.StopDownload(item);
+
         return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
 
@@ -133,37 +152,27 @@ public class DownloadsController : Controller
         return RedirectToAction("Index");
     }
 
-    public async Task<IActionResult> DeleteItem(int Id)
+    public IActionResult DeleteItem(int Id)
     {
         DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == Id);
         if(item == null) return NotFound();
+        if(item.State == States.Downloading) return NotFound("Datei kann nicht gelöscht werden, während sie heruntergeladen wird.");
+        if(item.State == States.Extracting) return NotFound("Datei kann nicht gelöscht werden, während sie entpackt wird.");
 
-        await Background.BackgroundTasks.Instance.StopDownload(item);
         string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
         string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
-        if(System.IO.File.Exists(filePath))
-            System.IO.File.Delete(filePath);
+        try{
+            if(System.IO.File.Exists(filePath))
+                System.IO.File.Delete(filePath);
+        } catch(Exception ex) {
+            return StatusCode(500, "Server konnte die Datei nicht löschen: \r\n" + ex.Message);
+        }
 
-        _context.Items.Remove(item);
-        _context.SaveChanges();
+        //item.State = States.Waiting;
+        //_context.Items.Update(item);
+        //_context.SaveChanges();
 
-        return RedirectToAction("Detail", new { id = Id });
-    }
-
-    public IActionResult Detail(int Id)
-    {
-        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == Id);
-        if(group == null) return NotFound();
-
-        IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id);
-        int size = 0;
-        foreach(DownloadItem item in items)
-            size += item.Size;
-
-        ViewData["totalSize"] = DownloadHelper.GetSizeString(size);
-        ViewData["Items"] = items;
-
-        return View(group);
+        return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
 
     public IActionResult Pause(int id)
@@ -245,7 +254,6 @@ public class DownloadsController : Controller
         return RedirectToAction("Detail", new { id = item.DownloadGroupID });
     }
 
-
     public async Task<IActionResult> StopItem(int id)
     {
         DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
@@ -281,5 +289,18 @@ public class DownloadsController : Controller
         System.Console.WriteLine(plainTextBytes);
         latestCheck = Newtonsoft.Json.JsonConvert.DeserializeObject<CheckViewModel>(plainTextBytes);
         return Ok("ShareLoader");
+    }
+    
+    public IActionResult ApiFile(IFormFile file)
+    {
+        System.Console.WriteLine("ApiFile");
+        string content;
+        using(StreamReader reader = new StreamReader(file.OpenReadStream()))
+        {
+            content = reader.ReadToEnd();
+        }
+        
+        latestCheck = DecryptHelper.DecryptContainer(content);
+        return RedirectToAction("Add");
     }
 }

@@ -71,7 +71,7 @@ public class DownloadChecker
             {
                 foreach(DownloadGroup group in context.Groups.Where(g => g.State == GroupStates.Normal))
                 {
-                    items.AddRange(context.Items.Where(i => i.State == States.Waiting).ToList());   
+                    items.AddRange(context.Items.Where(i => i.DownloadGroupID == group.Id && i.State == States.Waiting).ToList());   
                 }
             }
             foreach(DownloadItem item in items)
@@ -98,14 +98,8 @@ public class DownloadChecker
     {
         ChangeItemState(model.Item, States.Downloading);
         System.Console.WriteLine($"Downloading now: {model.Item.ItemId} ({model.Item.Name}) with hoster {model.Manager.Identifier}");
-        Stream s = await model.Manager.GetDownloadStream(model.Item, model.Profile);
-        if(s == null)
-        {
-            ChangeItemState(model.Item, States.Error);
-            _ = SocketHelper.Instance.SendIDError(model.Item);
-            _currentItems.Remove(model);
-            return;
-        }
+        bool acceptRange = await model.Manager.CheckStreamRange(model.Item, model.Profile);
+        
 
         SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
 
@@ -123,15 +117,30 @@ public class DownloadChecker
             System.IO.Directory.CreateDirectory(extractDir);
 
         string filePath = System.IO.Path.Combine(filesDir, model.Item.Name);
-        
-        if (System.IO.File.Exists(filePath))
-            System.IO.File.Delete(filePath);
+        Stream? s = null;
+
+        if(!acceptRange || !System.IO.File.Exists(filePath))
+        {
+            s = await model.Manager.GetDownloadStream(model.Item, model.Profile);
+        } else {
+            FileInfo info = new FileInfo(filePath);
+            s = await model.Manager.GetDownloadStream(model.Item, model.Profile, info.Length);
+        }
+
+        if(s == null)
+        {
+            ChangeItemState(model.Item, States.Error);
+            _ = SocketHelper.Instance.SendIDError(model.Item);
+            _currentItems.Remove(model);
+            return;
+        }
 
         System.Console.WriteLine($"Downloading now into: {filePath}");
 
         System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.OpenOrCreate);
 
         try{
+            fs.Position = fs.Length;
             await s.CopyToAsync(fs, model.Token.Token);
             ChangeItemState(model.Item, States.Downloaded);
             _ = SocketHelper.Instance.SendIDDownloaded(model.Item);
