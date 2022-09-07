@@ -31,8 +31,6 @@ public class DownloadsController : Controller
     {
         if(latestCheck == null) return NotFound();
 
-        ViewData["OMDB_APIKEY"] = EnvironmentHelper.GetVariable("OMDB_APIKEY");
-
         return View(latestCheck);
     }
 
@@ -75,6 +73,12 @@ public class DownloadsController : Controller
     }
 
 
+    public async Task<IActionResult> GetSearchResults(string query, string type, string page)
+    {
+        string omdbapi = EnvironmentHelper.GetVariable("OMDB_APIKEY");
+        string response = await new HttpClient().GetStringAsync("https://www.omdbapi.com/?apikey=" + omdbapi + "&s=" + query + "&type=" + type + "&page=" + page);
+        return Ok(response);
+    }
 
     public async Task<IActionResult> Reset(int id)
     {

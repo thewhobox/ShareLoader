@@ -242,7 +242,7 @@ function searchNext() {
 function search() {
     $("#searchBar").css("visibility", "visible");
     let query = $("#inSearch").val();
-    $.getJSON("https://www.omdbapi.com/?apikey=" + omdbapi + "&s=" + query + "&type=" + stype + "&page=" + currentPage, function (data) {
+    $.getJSON(window.location.origin + "/Downloads/GetSearchResults?query=" + query + "&page=" + currentPage + "&type=" + stype, function (data) {
         console.log(data);
         $("#searchResults").html("");
         if (data.Response == "False") {
