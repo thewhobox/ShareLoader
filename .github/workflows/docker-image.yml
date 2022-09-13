@@ -30,6 +30,6 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ShareLoader/
-          platforms: linux/amd64,linux/arm64,linux/armv7,linux/armv8
+          platforms: linux/arm64,linux/armv7,linux/armv8
           push: true
           tags: thewhobox/shareloader:latest
