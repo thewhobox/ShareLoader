@@ -1,9 +1,16 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ShareLoader.Data.DownloadContext>();
 builder.Services.AddSingleton<IHostedService, ShareLoader.Background.BackgroundTasks>();
+
+using(ShareLoader.Data.DownloadContext context = new ShareLoader.Data.DownloadContext())
+{
+    context.Database.Migrate();
+}
 
 var app = builder.Build();
 

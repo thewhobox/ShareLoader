@@ -2,12 +2,12 @@
 #-buster-slim-arm32v7
 # -r linux-arm
 
-FROM mcr.microsoft.com/dotnet/aspnet:3.1 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 WORKDIR /app
 RUN apt-get update && apt-get install -y p7zip-full
-EXPOSE 8083
+EXPOSE 80
 
-FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src
 COPY ["ShareLoader.csproj", "."]
 RUN dotnet restore "./ShareLoader.csproj" #-r linux-arm
