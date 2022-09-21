@@ -8,15 +8,19 @@ RUN apt-get update && apt-get install -y p7zip-full
 EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
-WORKDIR /src
-COPY ["ShareLoader.csproj", "."]
-RUN dotnet restore "./ShareLoader.csproj" #-r linux-arm
+WORKDIR /src/ShareLoader
+COPY ["ShareLoader/ShareLoader.csproj", "."]
+RUN dotnet restore "./ShareLoader/ShareLoader.csproj" -r linux-arm
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "ShareLoader.csproj" -c Release -o /app/build #-r linux-arm
+WORKDIR /src/ShareLoader.Share
+COPY ["ShareLoader.Share/ShareLoader.Share.csproj", "."]
+RUN dotnet restore "./ShareLoader.Share/ShareLoader.Share.csproj" -r linux-arm
+COPY . .
+WORKDIR "/src/ShareLoader."
+RUN dotnet build "ShareLoader.csproj" -c Release -o /app/build -r linux-arm
 
 FROM build AS publish
-RUN dotnet publish "ShareLoader.csproj" -c Release -o /app/publish #-r linux-arm
+RUN dotnet publish "ShareLoader/ShareLoader.csproj" -c Release -o /app/publish -r linux-arm
 
 FROM base AS final
 WORKDIR /app
