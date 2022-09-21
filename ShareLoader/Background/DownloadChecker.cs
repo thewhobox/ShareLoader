@@ -40,8 +40,17 @@ public class DownloadChecker
             await Task.Delay(5);
     }
 
+
+    bool flag1 = false;
     private void CheckTimer(object? state)
     {
+        if(SettingsHelper.GetSetting<SettingsModel>("settings") == null)
+        {
+            if(!flag1) System.Console.WriteLine("Es wurden noch keine Einstellungen gespeichert");
+            flag1 = true;
+            return;
+        }
+        flag1 = false;
         string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
         foreach(DownloadModel model in _currentItems)
         {
@@ -58,13 +67,23 @@ public class DownloadChecker
         }
     }
 
+    bool flag2 = false;
     private async void Check()
     {
         while(true)
         {
             await Task.Delay(TimeSpan.FromSeconds(10));
             SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
-            if(_currentItems.Count >= settings.MaxDownloads) continue;
+            if(settings == null || _currentItems.Count >= settings.MaxDownloads) continue;
+
+
+            if(!System.IO.Directory.Exists(settings.DownloadFolder))
+            {
+                if(!flag2) System.Console.WriteLine("Downloadfolder does not exist: " + settings.DownloadFolder);
+                flag2 = true;
+                continue;
+            }
+            flag2 = false;
 
             List<DownloadItem> items = new List<DownloadItem>();
             using(DownloadContext context = new DownloadContext())

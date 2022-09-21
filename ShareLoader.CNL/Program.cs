@@ -3,6 +3,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IHostedService, ShareLoader.CNL.Classes.BackgroundWatcher>();
+builder.WebHost.UseUrls("http://localhost:9666");
+
 
 var app = builder.Build();
 

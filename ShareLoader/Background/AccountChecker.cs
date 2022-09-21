@@ -20,16 +20,15 @@ public class AccountChecker
 
     private async void Check()
     {
-        using (DownloadContext context = new DownloadContext())
-        {
-            foreach (AccountModel acc in context.Accounts)
-                Profiles.Add(acc.Id, new AccountProfile(acc));
-        }
-
         while (true)
         {
             using (DownloadContext context = new DownloadContext())
             {
+                foreach (AccountProfile profile in Profiles.Values.ToList())
+                {
+                    if(!context.Accounts.Any(a => a.Id == profile.Model.Id))
+                        Profiles.Remove(profile.Model.Id);
+                }
                 foreach (AccountModel acc in context.Accounts.ToList())
                 {
                     if (Profiles.ContainsKey(acc.Id)) continue;

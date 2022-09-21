@@ -106,14 +106,24 @@ public class flashController : Controller
         string linksb64 = System.Convert.ToBase64String(plainTextBytes);
         string host = SettingsHelper.GetSetting("host");
 
-        var res = await client.GetStringAsync(host + "/Downloads/ApiAdd?links=" + linksb64);
-
-        var ps = new ProcessStartInfo(host + "/Downloads/Add")
-        { 
-            UseShellExecute = true, 
-            Verb = "open" 
-        };
+        try {
+            var res = await client.GetStringAsync(host + "/Downloads/ApiAdd?links=" + linksb64);
+            var ps = new ProcessStartInfo(host + "/Downloads/Add")
+            { 
+                UseShellExecute = true, 
+                Verb = "open" 
+            };
         Process.Start(ps);
+        } catch{
+            var ps = new ProcessStartInfo("http://localhost:9666/flash/error/1")
+            { 
+                UseShellExecute = true, 
+                Verb = "open" 
+            };
+            Process.Start(ps);
+        }
+
+        
 
         return Ok();
     }

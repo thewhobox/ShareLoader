@@ -30,7 +30,8 @@ public class ExtractChecker
         while(true)
         {
             await Task.Delay(TimeSpan.FromSeconds(10));
-            if(download.isDownloading || !download.nothingToDownload ||isExtracting) continue;
+            if(SettingsHelper.GetSetting<SettingsModel>("settings") == null || 
+                download.isDownloading || !download.nothingToDownload ||isExtracting) continue;
 
             _currentItem = null;
             Dictionary<int, string> passwords = new Dictionary<int, string>();

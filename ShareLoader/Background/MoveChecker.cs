@@ -30,7 +30,9 @@ public class MoveChecker
         while(true)
         {
             await Task.Delay(TimeSpan.FromSeconds(10));
-            if(download.isDownloading || !download.nothingToDownload || extract.isExtracting || !extract.nothingToExtract) continue;
+            if(SettingsHelper.GetSetting<SettingsModel>("settings") == null || 
+                download.isDownloading || !download.nothingToDownload || 
+                extract.isExtracting || !extract.nothingToExtract) continue;
 
             _currentItem = null;
             Dictionary<int, string> sorts = new Dictionary<int, string>();
