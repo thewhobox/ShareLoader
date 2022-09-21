@@ -11,16 +11,16 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 WORKDIR /src/ShareLoader
 COPY ["ShareLoader/ShareLoader.csproj", "."]
 RUN dotnet restore "./ShareLoader/ShareLoader.csproj"
-COPY . .
+COPY ./ShareLoader .
 WORKDIR /src/ShareLoader.Share
 COPY ["ShareLoader.Share/ShareLoader.Share.csproj", "."]
 RUN dotnet restore "./ShareLoader.Share.csproj"
-COPY . .
+COPY ./ShareLoader.Share .
 WORKDIR "/src/ShareLoader."
 RUN dotnet build "ShareLoader.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "ShareLoader/ShareLoader.csproj" -c Release -o /app/publish
+RUN dotnet publish "ShareLoader.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
