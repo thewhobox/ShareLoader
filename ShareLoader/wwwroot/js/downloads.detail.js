@@ -40,9 +40,10 @@ function connect() {
             case "error":
                 setIcon(resp.id, "warning_amber");
                 setColor(resp.id, "red");
-                setProgress(resp.id, 100);
+                setProgress(resp.id, -1);
                 setVis(resp.id, "pause", false);
                 setVis(resp.id, "stop", false);
+                $("li[data-id=" + resp.id + "] span.errmsg").html(resp.message);
                 break;
             case "reset":
                 setIcon(resp.id, "mif-hour-glass fg-black");

@@ -55,7 +55,8 @@ public class ExtractChecker
                     {
                         if(igroup.Count() > 1)
                         {
-                            _currentItem = igroup.Single(i => i.Name.Contains(".part1.rar"));
+                            Regex reg = new Regex(@"\.part([0]{0,})1\.rar");
+                            _currentItem = igroup.Single(i => reg.IsMatch(i.Name));
                         } else {
                             _currentItem = igroup.ElementAt(0);
                         }
@@ -109,8 +110,9 @@ public class ExtractChecker
 
         if(p.ExitCode != 0 || foundError || _extractToken.IsCancellationRequested)
         {
-            ChangeItemState(States.Error);
-            _ = SocketHelper.Instance.SendIDError(_currentItem);
+            string msg = $"ExitCode: {p.ExitCode}\r\n{errortext}";
+            ChangeItemState(States.Error, msg);
+            _ = SocketHelper.Instance.SendIDError(_currentItem, msg);
             _currentItem = null;
             return;
         }
@@ -136,66 +138,71 @@ public class ExtractChecker
     }
 
     private bool foundError = false;
+    string errortext = "";
 
     private async void GetProgress(System.Diagnostics.Process p)
     {
         foundError = false;
-        string fulltext = "";
+        errortext = "";
         try{
             Regex reg = new Regex("^[ ]{0,2}([0-9]{1,3})%");
             char[] buffer = new char[1024];
             string currentLine = "";
 
-            while (!p.HasExited)
-            {
 
-                
-                int readed = p.StandardOutput.Read(buffer, 0, 1024);
-
-                foreach (char c in buffer)
+            _= System.Threading.Tasks.Task.Run(async () => {
+                while (!p.HasExited)
                 {
-                    if (c != '\0' && c != '\n')
-                    {
-                        if (c == '\r')
-                        {
-                            Match m = reg.Match(currentLine);
 
-                            if (m.Success)
+                    
+                    int readed = p.StandardOutput.Read(buffer, 0, 1024);
+
+                    foreach (char c in buffer)
+                    {
+                        if (c != '\0' && c != '\n')
+                        {
+                            if (c == '\r')
                             {
-                                if(m.Groups[1].Value != "0")
-                                    await SocketHelper.Instance.SendIDExtract(_currentItem, int.Parse(m.Groups[1].Value));
+                                Match m = reg.Match(currentLine);
+
+                                if (m.Success)
+                                {
+                                    if(m.Groups[1].Value != "0")
+                                        await SocketHelper.Instance.SendIDExtract(_currentItem, int.Parse(m.Groups[1].Value));
+                                }
+
+                                currentLine = "";
                             }
                             else
                             {
-                                if(currentLine.Contains("ERROR"))
-                                {
-                                    foundError = true;
-                                    System.Console.WriteLine("Es trat ein Fehler auf: " + currentLine);
-                                } else if(foundError)
-                                {
-                                    System.Console.WriteLine("Es trat ein Fehler auf: " + currentLine);
-                                }
+                                currentLine = currentLine + c.ToString();
                             }
-
-                            fulltext += currentLine;
-                            currentLine = "";
-                        }
-                        else
-                        {
-                            currentLine = currentLine + c.ToString();
                         }
                     }
                 }
-            }
+            });
+
+            _= System.Threading.Tasks.Task.Run(() => {
+                while (!p.HasExited)
+                {
+                    string? error = p.StandardError.ReadLine();
+                    if(string.IsNullOrEmpty(error) || error.Length < 5) continue;
+                    errortext += error + "\r\n";
+                    foundError = true;
+                }
+            });
+            
         } catch (Exception ex)
         {
             System.Console.WriteLine("Es trat ein Fehler auf: " + ex.Message);
         }
-        System.Console.WriteLine("Exit Code: " + p.ExitCode.ToString());
+        while (!p.HasExited)
+        {
+            await Task.Delay(10);
+        }
     }
 
-
-    private void ChangeItemState(States state)
+    private void ChangeItemState(States state, string message = "")
     {
         using(DownloadContext context = new DownloadContext())
         {
@@ -203,6 +210,11 @@ public class ExtractChecker
             {   
                 item.State = state;
                 context.Items.Update(item);
+            }
+
+            if(state == States.Error && _currentItem != null)
+            {
+                context.Errors.Add(new ErrorModel() { GroupId = _currentItem.DownloadGroupID, ItemId = _currentItem.Id, Text = message, FileName = _currentItem.Name });
             }
             context.SaveChanges();
         }

@@ -1,0 +1,47 @@
+@using ShareLoader.Share
+@model DownloadGroup
+@{
+    ViewData["Title"] = "Gruppe bearbeiten";
+}
+
+<div class="row">
+    <form class="col s12" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row">
+            <div class="input-field col s12">
+                <input asp-for="Name" type="text" autocomplete="off" required>
+                <label asp-for="Name">Name</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input asp-for="Password" type="text" autocomplete="off" required>
+                <label asp-for="Password">Passwort</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <select asp-for="Type" asp-items="Html.GetEnumSelectList<DownloadType>()" data-validate="required not=0"></select>
+                <label asp-for="Type">Sort</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input asp-for="Sort" type="text" autocomplete="off" required>
+                <label asp-for="Sort">Sort</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s3">
+                <button class="btn waves-effect waves-light green darken-1" type="submit" name="action">
+                    Speichern
+                </button>
+            </div>
+            
+            <div class="input-field col s3">
+                <a asp-action="Detail" asp-route-id="@Model.Id" class="btn waves-effect waves-light red darken-1">Abbrechen</a>
+            </div>
+        </div>
+    </form>
+</div>

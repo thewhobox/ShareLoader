@@ -22,6 +22,8 @@
     } else {
         <a asp-controller="Downloads" asp-action="UnPause" asp-route-id="@Model.Id" title="Fortsetzen"><i class="material-icons">play_circle</i></a>
     }
+    <a asp-controller="Downloads" asp-action="Edit" asp-route-id="@Model.Id" title="Gruppe bearbeiten"><i class="material-icons">edit</i></a>
+    <a asp-controller="Downloads" asp-action="Errors" asp-route-id="@Model.Id" title="Fehler anzeigen"><i class="material-icons">warning_amber</i></a>
 </div>
 
 
@@ -32,7 +34,8 @@
             <i class="material-icons circle @item.GetColor()">@item.GetImage()</i>
             <span class="title">@item.Name</span>
             <p>
-                Größe: @item.GetSize()
+                Größe: @item.GetSize()<br />
+                <span class="errmsg"></span>
             </p>
             <div class="progress" style="display: none">
                 <div class="determinate" style="width: 0%"></div>

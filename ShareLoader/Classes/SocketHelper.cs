@@ -70,9 +70,11 @@ namespace ShareLoader.Classes
             await SendUpdate("{ \"type\": \"info\", \"id\": \"" + item.Id.ToString() + "\", \"perc\": \"" + perc + "\", \"average\": " + averageRead.ToString().Replace(',', '.') + ", \"speed\": \"" + string.Format(format[i], averageRead) + "\", \"stamp\": \"" + DateTime.Now.ToString() + "\" }", item.Id, item.DownloadGroupID, "downinfo");
         }
 
-        public async Task SendIDError(DownloadItem item)
+        public async Task SendIDError(DownloadItem item, string message)
         {
-            await SendUpdate("{ \"type\": \"error\", \"id\": \"" + item.Id.ToString() + "\" }", item.Id, item.DownloadGroupID, "downinfo");
+            message = message.Replace("\\", "\\\\");
+            message = message.Replace("\r\n", "\\r\\n");
+            await SendUpdate("{ \"type\": \"error\", \"id\": \"" + item.Id.ToString() + "\", \"message\": \"" + message + "\" }", item.Id, item.DownloadGroupID, "downinfo");
         }
 
         public async Task SendIDDownloaded(DownloadItem item)

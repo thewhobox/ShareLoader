@@ -72,12 +72,14 @@ public class DownloadsController : Controller
         return View(group);
     }
 
-
-    public async Task<IActionResult> GetSearchResults(string query, string type, string page)
+    public IActionResult Errors(int id)
     {
-        string omdbapi = EnvironmentHelper.GetVariable("OMDB_APIKEY");
-        string response = await new HttpClient().GetStringAsync("https://www.omdbapi.com/?apikey=" + omdbapi + "&s=" + query + "&type=" + type + "&page=" + page);
-        return Ok(response);
+        DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);
+        if(group == null) return NotFound();
+        List<ErrorModel> errors = _context.Errors.Where(e => e.GroupId == id).ToList();
+        ViewData["GroupId"] = id;
+        ViewData["GroupName"] = group.Name;
+        return View(errors);
     }
 
     public async Task<IActionResult> Reset(int id)
@@ -111,6 +113,37 @@ public class DownloadsController : Controller
         await Background.BackgroundTasks.Instance.StopDownload(item);
 
         return RedirectToAction("Detail", new { id = item.DownloadGroupID });
+    }
+
+    public  IActionResult Edit(int id)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(i => i.Id == id);
+        if(group == null) return NotFound();
+        return View(group);
+    }
+
+    [HttpPost]
+    public  IActionResult Edit(DownloadGroup g)
+    {
+        DownloadGroup? group = _context.Groups.SingleOrDefault(i => i.Id == g.Id);
+        if(group == null) return NotFound();
+
+        group.Name = g.Name;
+        group.Password = g.Password;
+        group.Type = g.Type;
+        group.Sort = g.Sort;
+
+        _context.Groups.Update(group);
+        _context.SaveChanges();
+        return RedirectToAction("Detail", new { id = g.Id });
+    }
+
+
+    public async Task<IActionResult> GetSearchResults(string query, string type, string page)
+    {
+        string omdbapi = EnvironmentHelper.GetVariable("OMDB_APIKEY");
+        string response = await new HttpClient().GetStringAsync("https://www.omdbapi.com/?apikey=" + omdbapi + "&s=" + query + "&type=" + type + "&page=" + page);
+        return Ok(response);
     }
 
     public async Task<IActionResult> GetItemInfo(string url)
@@ -177,6 +210,17 @@ public class DownloadsController : Controller
         //_context.SaveChanges();
 
         return RedirectToAction("Detail", new { id = item.DownloadGroupID });
+    }
+
+    public IActionResult DeleteError(int Id)
+    {
+        ErrorModel? item = _context.Errors.SingleOrDefault(i => i.Id == Id);
+        if(item == null) return NotFound();
+        
+        _context.Errors.Remove(item);
+        _context.SaveChanges();
+
+        return RedirectToAction("Errors", new { id = item.GroupId });
     }
 
     public IActionResult Pause(int id)
