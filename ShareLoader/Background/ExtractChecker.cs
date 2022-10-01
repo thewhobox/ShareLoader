@@ -116,11 +116,21 @@ public class ExtractChecker
             _currentItem = null;
             return;
         }
-        
-        foreach(DownloadItem item in _items)
+
+        try
         {
-            fileDir = Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "files", item.Name);
-            System.IO.File.Delete(fileDir);
+            foreach (DownloadItem item in _items)
+            {
+                string dfolder = settings.DownloadFolder;
+                string gid = _currentItem.DownloadGroupID.ToString();
+                string name = item.Name;
+                fileDir = Path.Combine(dfolder, gid, "files", name);
+                System.IO.File.Delete(fileDir);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
         }
 
         ChangeItemState(States.Extracted);

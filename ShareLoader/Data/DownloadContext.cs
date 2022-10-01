@@ -8,7 +8,7 @@ namespace ShareLoader.Data;
 
 public class DownloadContext : DbContext
 {
-    public static string databasePath = "database.db";
+    public static string databasePath = "/shareloader/database.db";
 
     public DownloadContext() : base() { }
     public DownloadContext(DbContextOptions<DownloadContext> options) : base(options) { }

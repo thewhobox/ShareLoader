@@ -306,6 +306,8 @@ function getSeasons(imdbid, addName = false) {
             $("#searchResults").html(data.Title);
         }
 
+        if (data.totalSeasons == undefined) return;
+
         let selectele = '<select id="inSeason">';
 
         selectele += "<option value=\"select\" disabled=\"disabled\">Bitte Staffel auswählen</option>";
