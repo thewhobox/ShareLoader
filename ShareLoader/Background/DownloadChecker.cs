@@ -147,13 +147,29 @@ public class DownloadChecker
             s = await model.Manager.GetDownloadStream(model.Item, model.Profile);
         } else {
             FileInfo info = new FileInfo(filePath);
+            if(info.Length == model.Item.Size)
+            {
+                ChangeItemState(model.Item, States.Downloaded);
+                _ = SocketHelper.Instance.SendIDDownloaded(model.Item);
+                _currentItems.Remove(model);
+                System.Diagnostics.Debug.WriteLine("Datei schon komplett heruntergeladen");
+                return;
+            }
+            if(info.Length > model.Item.Size)
+            {
+                ChangeItemState(model.Item, States.Error);
+                _ = SocketHelper.Instance.SendIDError(model.Item, "Datei ist größer als möglich");
+                _currentItems.Remove(model);
+                System.Diagnostics.Debug.WriteLine("Datei ist größer als möglich");
+                return;
+            }
             s = await model.Manager.GetDownloadStream(model.Item, model.Profile, info.Length);
         }
 
         if(s == null)
         {
             ChangeItemState(model.Item, States.Error);
-            _ = SocketHelper.Instance.SendIDError(model.Item);
+            _ = SocketHelper.Instance.SendIDError(model.Item, "Stream konnte nicht geladen werden");
             _currentItems.Remove(model);
             return;
         }
@@ -167,9 +183,9 @@ public class DownloadChecker
             await s.CopyToAsync(fs, model.Token.Token);
             ChangeItemState(model.Item, States.Downloaded);
             _ = SocketHelper.Instance.SendIDDownloaded(model.Item);
-        } catch {
-            ChangeItemState(model.Item, States.Error);
-            _ = SocketHelper.Instance.SendIDError(model.Item);
+        } catch (Exception ex) {
+            ChangeItemState(model.Item, States.Error, ex.Message);
+            _ = SocketHelper.Instance.SendIDError(model.Item, ex.Message);
         }
         fs.Close();
         fs.Dispose();
@@ -179,13 +195,17 @@ public class DownloadChecker
         _currentItems.Remove(model);
     }
 
-    private void ChangeItemState(DownloadItem item, States state)
+    private void ChangeItemState(DownloadItem item, States state, string message = "")
     {
         if(item.State == state) return;
         item.State = state;
         using(DownloadContext context = new DownloadContext())
         {
             context.Items.Update(item);
+            if(state == States.Error && item != null)
+            {
+                context.Errors.Add(new ErrorModel() { GroupId = item.DownloadGroupID, ItemId = item.Id, Text = message, FileName = item.Name });
+            }
             context.SaveChanges();
         }
     }

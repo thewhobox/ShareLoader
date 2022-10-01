@@ -1,0 +1,25 @@
+@model List<ErrorModel>
+@{
+    ViewData["Title"] = "Fehler " + ViewData["GroupName"];
+}
+
+<div style="margin: 10px">
+    <a asp-controller="Downloads" asp-action="Detail" asp-route-id="@ViewData["GroupId"]" title="Gruppe anzeigen"><i class="material-icons">arrow_back</i></a>
+</div>
+
+
+<ul class="collection">
+    @foreach(ErrorModel error in Model)
+    {
+        <li data-id="@error.Id" class="collection-item avatar">
+            <i class="material-icons circle red">warning_amber</i>
+            <span class="title">@error.FileName</span>
+            <p>
+                @Html.Raw(error.Text.Replace("\r\n", "<br />"));
+            </p>
+            <div class="secondary-content">
+                <a asp-controller="Downloads" asp-action="DeleteError" asp-route-id="@error.Id" data-action="delete" title="Fehler löschen"><i class="material-icons">delete_forever</i></a>
+            </div>
+        </li>
+    }
+</ul>
