@@ -2,6 +2,8 @@ namespace ShareLoader.Share;
 
 public class SettingsHelper
 {
+    public static string FilePath { get; set; } = "/shareloader/settings.txt";
+
     public static Dictionary<string, string> Settings { get; set; }
 
     public static T GetSetting<T>(string name)
@@ -42,18 +44,18 @@ public class SettingsHelper
 
     public static void Load()
     {
-        if(!System.IO.File.Exists("settings.txt"))
+        if(!System.IO.File.Exists(FilePath))
         {
             Settings = new Dictionary<string, string>();
             return;
         }
             
-        string content = System.IO.File.ReadAllText("settings.txt");
+        string content = System.IO.File.ReadAllText(FilePath);
         Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
     }
 
     public static void Save()
     {
-        System.IO.File.WriteAllText("settings.txt", Newtonsoft.Json.JsonConvert.SerializeObject(Settings));
+        System.IO.File.WriteAllText(FilePath, Newtonsoft.Json.JsonConvert.SerializeObject(Settings));
     }
 }

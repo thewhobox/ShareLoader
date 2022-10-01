@@ -5,6 +5,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddSingleton<IHostedService, ShareLoader.CNL.Classes.BackgroundWatcher>();
 builder.WebHost.UseUrls("http://localhost:9666");
 
+ShareLoader.Share.SettingsHelper.FilePath = "settings.txt";
 
 var app = builder.Build();
 

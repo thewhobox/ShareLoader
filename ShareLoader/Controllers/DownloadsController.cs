@@ -80,6 +80,13 @@ public class DownloadsController : Controller
         return Ok(response);
     }
 
+    public async Task<IActionResult> GetSeasons(string id)
+    {
+        string omdbapi = EnvironmentHelper.GetVariable("OMDB_APIKEY");
+        string response = await new HttpClient().GetStringAsync("https://www.omdbapi.com/?apikey=" + omdbapi + "&i=" + id);
+        return Ok(response);
+    }
+
     public async Task<IActionResult> Reset(int id)
     {
         DownloadGroup? group = _context.Groups.SingleOrDefault(g => g.Id == id);

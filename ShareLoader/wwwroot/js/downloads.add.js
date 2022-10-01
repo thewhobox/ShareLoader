@@ -292,7 +292,7 @@ function addClick() {
 }
 
 function getSeasons(imdbid, addName = false) {
-    $.getJSON("https://www.omdbapi.com/?apikey=" + omdbapi + "&i=" + imdbid, function (data) {
+    $.getJSON(window.location.origin + "/Downloads/GetSeasons/" + imdbid, function (data) {
         if (data.Response == "False") {
             alert("Imdb ID nicht gefunden");
             setName("none");

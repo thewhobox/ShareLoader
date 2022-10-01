@@ -19,6 +19,7 @@ public class DownloadChecker
     private List<DownloadModel> _currentItems = new List<DownloadModel>();
     AccountChecker account;
     Timer _timer;
+    int checkCounter = 0;
 
     public DownloadChecker(AccountChecker acc)
     {
@@ -105,10 +106,13 @@ public class DownloadChecker
                     Profile = profile
                 };
                 _currentItems.Add(model);
+                checkCounter = 0;
                 DoDownload(model);
                 break;
             }
-            nothingToDownload = true;
+
+            checkCounter++;
+            if(checkCounter > 2) nothingToDownload = true;
             LastChecked = DateTime.Now;
         }
     }
