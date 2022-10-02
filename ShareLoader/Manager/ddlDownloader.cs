@@ -76,8 +76,9 @@ public class ddlDownloader : IDownloadManager
                 resp = await profile.Client.SendAsync(req, HttpCompletionOption.ResponseHeadersRead);
                 s = resp.Content.ReadAsStream();
             }
-        } catch{
-
+        } catch(Exception ex) {
+            System.Console.WriteLine(ex.Message);
+            System.Console.WriteLine(ex.StackTrace);
         }
         return s;
     }
