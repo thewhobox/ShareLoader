@@ -53,7 +53,7 @@ public class DownloadChecker
         }
         flag1 = false;
         string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
-        foreach(DownloadModel model in _currentItems)
+        foreach(DownloadModel model in _currentItems.ToList())
         {
             double _current = 0;
             string filePath = Path.Combine(downloadPath, model.Item.DownloadGroupID.ToString(), "files", model.Item.Name);
