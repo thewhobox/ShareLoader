@@ -36,23 +36,26 @@ public class AccountChecker
                 }
             }
 
-            using (DownloadContext context = new DownloadContext())
+            try
             {
-                foreach (AccountProfile profile in Profiles.Values)
+                using (DownloadContext context = new DownloadContext())
                 {
-                    IDownloadManager downloader = DownloadHelper.GetDownloader(profile);
+                    foreach (AccountProfile profile in Profiles.Values)
+                    {
+                        IDownloadManager downloader = DownloadHelper.GetDownloader(profile);
 
-                    if (!profile.IsLoggedIn)
-                        profile.IsLoggedIn = await downloader.DoLogin(profile);
+                        if (!profile.IsLoggedIn)
+                            profile.IsLoggedIn = await downloader.DoLogin(profile);
 
-                    if (!profile.IsLoggedIn) continue;
-                    await downloader.GetAccounInfo(profile);
+                        if (!profile.IsLoggedIn) continue;
+                        await downloader.GetAccounInfo(profile);
 
-                    context.Accounts.Update(profile.Model);
+                        context.Accounts.Update(profile.Model);
+                    }
+
+                    context.SaveChanges();
                 }
-
-                context.SaveChanges();
-            }
+            } catch {}
             
             LastChecked = DateTime.Now;
             await Task.Delay(TimeSpan.FromMinutes(1));
