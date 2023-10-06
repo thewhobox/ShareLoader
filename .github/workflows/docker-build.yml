@@ -1,10 +1,7 @@
-name: Docker Image CI
+name: Docker Build CI
 
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - 'publish'
+  pull_request:
 
 jobs:
 
@@ -29,5 +26,5 @@ jobs:
       with:
         file: ShareLoader/Dockerfile
         platforms: linux/arm/v7,linux/amd64
-        push: true
+        push: false
         tags: thewhobox/shareloader:latest
