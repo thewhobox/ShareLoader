@@ -1,12 +1,15 @@
 version: "3.9"
+   
 services:
   shareloader:
-    image: thewhobox/shareloader
-    ports:
-      - "8083:8083"
+    image: thewhobox/shareloader:latest
     volumes:
-      - /share/ShareLoader:/mnt/share
-      - /share/Emby:/mnt/Emby
-      - logvolume01:/var/log
-volumes:
-  logvolume01: {}
+    - /etc/localtime:/etc/localtime:ro
+    - /share/Emby:/emby
+    - /share/ShareLoader:/shareloader
+    environment:
+    - DDL_APIKEY=xxxx
+    - OMDB_APIKEY=xxxx
+    ports:
+    - "18000:80"
+    restart: always
