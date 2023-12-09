@@ -45,7 +45,7 @@ public class ddlDownloader : IDownloadManager
         if(item.IsOnline)
         {
             item.Name = jresp["result"][0]["name"].ToString();
-            item.Size = int.Parse(jresp["result"][0]["size"].ToString());
+            item.Size = long.Parse(jresp["result"][0]["size"].ToString());
         }
 
         return item;

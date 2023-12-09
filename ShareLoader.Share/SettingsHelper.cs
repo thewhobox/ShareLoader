@@ -4,19 +4,29 @@ public class SettingsHelper
 {
     public static string FilePath { get; set; } = "/shareloader/settings.txt";
 
-    public static Dictionary<string, string> Settings { get; set; }
+    public SettingsHelper()
+    {
+        if(!Directory.Exists("/shareloader/"))
+        {
+            Console.WriteLine("/shareloader/ doesnt exist");
+            FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.txt");
+            Console.WriteLine("Using: " + FilePath);
+        }
+    }
 
-    public static T GetSetting<T>(string name)
+    public static Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
+
+    public static T? GetSetting<T>(string name)
     {
         if(Settings == null) Load();
-        if(!Settings.ContainsKey(name)) return (T)Convert.ChangeType(null, typeof(T));
+        if(Settings == null || !Settings.ContainsKey(name)) return (T?)Convert.ChangeType(null, typeof(T?));
         return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Settings[name]);
     }
 
     public static string GetSetting(string name)
     {
         if(Settings == null) Load();
-        if(!Settings.ContainsKey(name)) return "";
+        if(Settings == null || !Settings.ContainsKey(name)) return "";
         return Settings[name];
     }
 
@@ -51,7 +61,7 @@ public class SettingsHelper
         }
             
         string content = System.IO.File.ReadAllText(FilePath);
-        Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(content);
+        Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(content) ?? new();
     }
 
     public static void Save()

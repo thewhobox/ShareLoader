@@ -32,7 +32,7 @@ namespace ShareLoader.Classes
             switch (paras[0])
             {
                 case "register":
-                    Sockets.Add(new SocketItem() { Socket = socket, Id = int.Parse(paras[1]), Gid = int.Parse(paras[2]), SubscribeKeys = paras[3] });
+                    Sockets.Add(new SocketItem(socket, int.Parse(paras[1]), int.Parse(paras[2]), paras[3]));
                     break;
             }
         }

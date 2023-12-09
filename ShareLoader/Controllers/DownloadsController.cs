@@ -203,7 +203,7 @@ public class DownloadsController : Controller
         if(item.State == States.Downloading) return NotFound("Datei kann nicht gelöscht werden, während sie heruntergeladen wird.");
         if(item.State == States.Extracting) return NotFound("Datei kann nicht gelöscht werden, während sie entpackt wird.");
 
-        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings")?.DownloadFolder ?? "";
         string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
         try{
             if(System.IO.File.Exists(filePath))
@@ -272,7 +272,7 @@ public class DownloadsController : Controller
         DownloadItem? item = _context.Items.SingleOrDefault(i => i.Id == id);
         if(item == null) return NotFound();
 
-        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings")?.DownloadFolder ?? "";
         string filePath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "files", item.Name);
         string extractPath = System.IO.Path.Combine(downloadPath, item.DownloadGroupID.ToString(), "extracted", item.GroupID.ToString());
 

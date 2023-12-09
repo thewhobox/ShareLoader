@@ -39,10 +39,10 @@ public class DownloadHelper
         return downloader;
     }
 
-    public static IDownloadManager GetDownloader(AccountProfile profile)
+    public static IDownloadManager? GetDownloader(AccountProfile profile)
     {
         if (profile == null) return null;
-        IDownloadManager downloader = null;
+        IDownloadManager? downloader = null;
 
         var q = from t in Assembly.GetExecutingAssembly().GetTypes()
                 where t.IsClass && t.IsNested == false && t.Namespace == "ShareLoader.Manager"
@@ -50,8 +50,8 @@ public class DownloadHelper
 
         foreach (Type t in q.ToList())
         {
-            IDownloadManager down = (IDownloadManager)Activator.CreateInstance(t);
-            if (profile.Model.Hoster == down.Identifier)
+            IDownloadManager? down = (IDownloadManager?)Activator.CreateInstance(t);
+            if (down != null && profile.Model.Hoster == down.Identifier)
             {
                 downloader = down;
                 break;

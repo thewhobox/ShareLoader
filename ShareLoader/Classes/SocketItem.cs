@@ -12,5 +12,13 @@ namespace ShareLoader.Classes
         public int Id { get; set; }
         public int Gid { get; set; }
         public string SubscribeKeys { get; set; }
+
+        public SocketItem(WebSocket socket, int id, int gid, string keys)
+        {
+            Socket = socket;
+            Id = id;
+            gid = Gid;
+            SubscribeKeys = keys;
+        }
     }
 }

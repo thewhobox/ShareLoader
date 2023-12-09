@@ -15,7 +15,6 @@ public class DownloadChecker
         get { return _currentItems.Count > 0; }
     }
     public bool nothingToDownload = false;
-    private DownloadGroup _currentGroup;
     private List<DownloadModel> _currentItems = new List<DownloadModel>();
     AccountChecker account;
     Timer _timer;
@@ -105,6 +104,7 @@ public class DownloadChecker
                     Manager = manager, 
                     Profile = profile
                 };
+                await manager.DoLogin(profile);
                 _currentItems.Add(model);
                 checkCounter = 0;
                 DoDownload(model);
@@ -124,7 +124,13 @@ public class DownloadChecker
         bool acceptRange = await model.Manager.CheckStreamRange(model.Item, model.Profile);
         
 
-        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        SettingsModel? settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        if(settings == null)
+        {
+            ChangeItemState(model.Item, States.Waiting);
+            Console.WriteLine("Aborted Download due to no settings found");
+            return;
+        }
 
         string groupDir = System.IO.Path.Combine(settings.DownloadFolder, model.Item.DownloadGroupID.ToString());
         string filesDir = System.IO.Path.Combine(settings.DownloadFolder, model.Item.DownloadGroupID.ToString(), "files");

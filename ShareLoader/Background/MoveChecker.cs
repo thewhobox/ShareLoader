@@ -13,8 +13,8 @@ public class MoveChecker
     public DateTime LastChecked { get; set; } = DateTime.Now;
     private DownloadItem? _currentItem;
     private DownloadType _currentType;
-    private string _currentSort;
-    private List<DownloadItem> _items;
+    private string _currentSort = "";
+    private List<DownloadItem> _items = new();
     DownloadChecker download;
     ExtractChecker extract;
 
@@ -76,9 +76,10 @@ public class MoveChecker
 
     private async void DoMove()
     {
+        if(_currentItem == null) return;
         System.Console.WriteLine("Moving now: " + _currentItem.Name);
         ChangeItemState(States.Moving);
-        _ = SocketHelper.Instance.SendIDMoving(_currentItem);
+        await SocketHelper.Instance.SendIDMoving(_currentItem);
 
         switch(_currentType)
         {
@@ -100,7 +101,8 @@ public class MoveChecker
 
     private void MoveMovie()
     {
-        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        SettingsModel? settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        if(settings == null || _currentItem == null) return;
         string pathFrom = System.IO.Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "extracted", _currentItem.GroupID.ToString());
         string[] files = Directory.GetFiles(pathFrom, "*.mkv");
         string fileToMove = "";
@@ -139,8 +141,9 @@ public class MoveChecker
         else
             _currentSort = _currentSort.Replace('/', Path.DirectorySeparatorChar);
         
-        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        SettingsModel? settings = SettingsHelper.GetSetting<SettingsModel>("settings");
 
+        if(settings == null || _currentItem == null) return;
         string pathFrom = System.IO.Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "extracted", _currentItem.GroupID.ToString());
         string[] files = Directory.GetFiles(pathFrom, "*.mkv");
 
@@ -181,7 +184,8 @@ public class MoveChecker
 
     public void MoveOther()
     {
-        SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        SettingsModel? settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+        if(settings == null || _currentItem == null) return;
         string pathFrom = System.IO.Path.Combine(settings.DownloadFolder, _currentItem.DownloadGroupID.ToString(), "extracted", _currentItem.GroupID.ToString());
         string[] files = Directory.GetFiles(pathFrom);
         string pathTo = Path.Combine(settings.MoveFolder, "Other");
