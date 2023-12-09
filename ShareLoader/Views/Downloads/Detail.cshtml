@@ -62,7 +62,7 @@
                 }
 
                 <a asp-controller="Downloads" asp-action="ResetItem" asp-route-id="@item.Id" title="Zurücksetzen"><i class="material-icons">restart_alt</i></a>
-                @if((bool)ViewData[item.ItemId] == true)
+                @if((bool?)ViewData[item.ItemId] == true)
                 {
                     <a asp-controller="Downloads" asp-action="DeleteItem" asp-route-id="@item.Id" data-action="delete" title="Datei löschen"><i class="material-icons">delete_forever</i></a>
                 } else {

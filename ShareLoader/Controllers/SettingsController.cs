@@ -19,7 +19,7 @@ public class SettingsController : Controller
 
     public IActionResult Index()
     {
-        SettingsModel model = SettingsHelper.GetSetting<SettingsModel>("settings");
+        SettingsModel? model = SettingsHelper.GetSetting<SettingsModel>("settings");
         return View(model);
     }
 

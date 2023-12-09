@@ -38,7 +38,7 @@ public class AccountsController : Controller
 
     public IActionResult Delete(int Id)
     {
-        AccountModel acc = _context.Accounts.SingleOrDefault(g => g.Id == Id);
+        AccountModel? acc = _context.Accounts.SingleOrDefault(g => g.Id == Id);
         if(acc == null) return NotFound();
         _context.Accounts.Remove(acc);
         _context.SaveChanges();

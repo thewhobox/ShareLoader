@@ -45,7 +45,7 @@ public class ddlDownloader : IDownloadManager
         if(item.IsOnline)
         {
             item.Name = jresp["result"][0]["name"].ToString();
-            item.Size = int.Parse(jresp["result"][0]["size"].ToString());
+            item.Size = long.Parse(jresp["result"][0]["size"].ToString());
         }
 
         return item;
@@ -67,9 +67,14 @@ public class ddlDownloader : IDownloadManager
     {
         Stream? s = null;
         try {
+            System.Console.WriteLine($"URL: https://ddownload.com/{item.ItemId}");
             HttpResponseMessage resp = await profile.Client.GetAsync("https://ddownload.com/" + item.ItemId);
+            System.Console.WriteLine($"Code: {resp.StatusCode}");
             if(start == 0)
+            {
+                System.Console.WriteLine($"Redirect: {resp.Headers.Location}");
                 s = await profile.Client.GetStreamAsync(resp.Headers.Location);
+            }
             else {
                 HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, resp.Headers.Location);
                 req.Headers.Range = new System.Net.Http.Headers.RangeHeaderValue(start, item.Size);

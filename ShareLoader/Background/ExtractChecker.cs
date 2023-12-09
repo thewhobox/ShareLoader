@@ -177,7 +177,7 @@ public class ExtractChecker
 
                                 if (m.Success)
                                 {
-                                    if(m.Groups[1].Value != "0")
+                                    if(m.Groups[1].Value != "0" && _currentItem != null)
                                         await SocketHelper.Instance.SendIDExtract(_currentItem, int.Parse(m.Groups[1].Value));
                                 }
 

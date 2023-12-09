@@ -36,23 +36,28 @@ public class AccountChecker
                 }
             }
 
-            using (DownloadContext context = new DownloadContext())
+            try
             {
-                foreach (AccountProfile profile in Profiles.Values)
+                using (DownloadContext context = new DownloadContext())
                 {
-                    IDownloadManager downloader = DownloadHelper.GetDownloader(profile);
+                    foreach (AccountProfile profile in Profiles.Values)
+                    {
+                        IDownloadManager? downloader = DownloadHelper.GetDownloader(profile);
+                        if(downloader == null)
+                            continue;
 
-                    if (!profile.IsLoggedIn)
-                        profile.IsLoggedIn = await downloader.DoLogin(profile);
+                        if (!profile.IsLoggedIn)
+                            profile.IsLoggedIn = await downloader.DoLogin(profile);
 
-                    if (!profile.IsLoggedIn) continue;
-                    await downloader.GetAccounInfo(profile);
+                        if (!profile.IsLoggedIn) continue;
+                        await downloader.GetAccounInfo(profile);
 
-                    context.Accounts.Update(profile.Model);
+                        context.Accounts.Update(profile.Model);
+                    }
+
+                    context.SaveChanges();
                 }
-
-                context.SaveChanges();
-            }
+            } catch {}
             
             LastChecked = DateTime.Now;
             await Task.Delay(TimeSpan.FromMinutes(1));
@@ -71,7 +76,12 @@ public class AccountChecker
     {
         AccountProfile profile = new AccountProfile(acc);
 
-        IDownloadManager downloader = DownloadHelper.GetDownloader(profile);
+        IDownloadManager? downloader = DownloadHelper.GetDownloader(profile);
+        if(downloader == null)
+        {
+            Console.WriteLine($"Anmeldung fehlgeschlagen. Kein Manager für Profil {profile.Model.Name}");
+            return;
+        }
         bool success = await downloader.DoLogin(profile);
         if (success)
         {
