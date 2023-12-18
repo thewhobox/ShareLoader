@@ -52,6 +52,7 @@ public class SettingsHelper
         Console.WriteLine("Using: " + FilePath);
         if(!System.IO.File.Exists(FilePath))
         {
+            Console.WriteLine("file doesnt exist");
             Settings = new Dictionary<string, string>();
             return;
         }
