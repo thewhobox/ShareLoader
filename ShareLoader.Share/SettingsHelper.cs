@@ -9,7 +9,6 @@ public class SettingsHelper
 
     public static T? GetSetting<T>(string name)
     {
-        Console.WriteLine("GetSetting<T>");
         if(!isLoaded) Load();
         if(!Settings.ContainsKey(name)) return (T?)Convert.ChangeType(null, typeof(T?));
         return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Settings[name]);
@@ -17,7 +16,6 @@ public class SettingsHelper
 
     public static string GetSetting(string name)
     {
-        Console.WriteLine("GetSetting<T>");
         if(!isLoaded) Load();
         if(!Settings.ContainsKey(name)) return "";
         return Settings[name];
@@ -47,7 +45,6 @@ public class SettingsHelper
 
     public static void Load()
     {
-        Console.WriteLine("Loading Settings " + FilePath);
         isLoaded = true;
         if(!Directory.Exists("/shareloader"))
         {
