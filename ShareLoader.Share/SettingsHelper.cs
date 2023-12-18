@@ -2,21 +2,22 @@ namespace ShareLoader.Share;
 
 public class SettingsHelper
 {
+    private static bool isLoaded = false;
     public static string FilePath { get; set; } = "/shareloader/settings.txt";
 
     public static Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();
 
     public static T? GetSetting<T>(string name)
     {
-        if(Settings == null) Load();
-        if(Settings == null || !Settings.ContainsKey(name)) return (T?)Convert.ChangeType(null, typeof(T?));
+        if(!isLoaded) Load();
+        if(!Settings.ContainsKey(name)) return (T?)Convert.ChangeType(null, typeof(T?));
         return Newtonsoft.Json.JsonConvert.DeserializeObject<T>(Settings[name]);
     }
 
     public static string GetSetting(string name)
     {
-        if(Settings == null) Load();
-        if(Settings == null || !Settings.ContainsKey(name)) return "";
+        if(!isLoaded) Load();
+        if(!Settings.ContainsKey(name)) return "";
         return Settings[name];
     }
 
@@ -44,6 +45,7 @@ public class SettingsHelper
 
     public static void Load()
     {
+        isLoaded = true;
         if(!Directory.Exists("/shareloader"))
         {
             Console.WriteLine("/shareloader/ doesnt exist");
