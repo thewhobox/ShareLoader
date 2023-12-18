@@ -14,12 +14,12 @@ public class DownloadContext : DbContext
 
     public DownloadContext() : base() 
     { 
-        if(!Directory.Exists("/shareloader/"))
+        if(!Directory.Exists("/shareloader"))
         {
             Console.WriteLine("/shareloader/ doesnt exist");
             databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database.db");
-            Console.WriteLine("Using: " + databasePath);
         }
+        Console.WriteLine("Using: " + databasePath);
     }
     public DownloadContext(DbContextOptions<DownloadContext> options) : base(options)
     {
