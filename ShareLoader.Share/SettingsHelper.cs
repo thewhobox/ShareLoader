@@ -64,7 +64,7 @@ public class SettingsHelper
 
         Console.WriteLine("Reading File");
         string content = System.IO.File.ReadAllText(FilePath);
-        Conosle.WriteLine("content: " + content);
+        Console.WriteLine("content: " + content);
         Settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(content) ?? new();
         Console.WriteLine("Count: " + Settings.Count());
     }
