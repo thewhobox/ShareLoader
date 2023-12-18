@@ -6,12 +6,12 @@ public class SettingsHelper
 
     public SettingsHelper()
     {
-        if(!Directory.Exists("/shareloader/"))
+        if(!Directory.Exists("/shareloader"))
         {
             Console.WriteLine("/shareloader/ doesnt exist");
             FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.txt");
-            Console.WriteLine("Using: " + FilePath);
         }
+        Console.WriteLine("Using: " + FilePath);
     }
 
     public static Dictionary<string, string> Settings { get; set; } = new Dictionary<string, string>();

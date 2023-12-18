@@ -1,1 +1,1 @@
-{"host":"http://qnap:49162","download":"C:\\Users\\u6\\Downloads"}
+{"download":"C:\\Users\\mikeg\\Downloads","host":"http://192.168.178.2:18000"}
