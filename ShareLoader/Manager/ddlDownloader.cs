@@ -132,7 +132,12 @@ public class ddlDownloader : IDownloadManager
 
     public async Task<bool> DoLogin(AccountProfile acc)
     {
-        string login = await acc.Client.GetStringAsync("https://ddownload.com/login.html");
+        string login = "";
+        try{
+            login = await acc.Client.GetStringAsync("https://ddownload.com/login.html");
+        } catch(System.Net.Http.HttpRequestException ex) {
+            return ex.StatusCode == System.Net.HttpStatusCode.Found;
+        }
 
 
         Dictionary<string, string> paras = new Dictionary<string, string>();
