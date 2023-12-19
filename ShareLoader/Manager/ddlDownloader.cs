@@ -136,7 +136,7 @@ public class ddlDownloader : IDownloadManager
         try{
             login = await acc.Client.GetStringAsync("https://ddownload.com/login.html");
         } catch(System.Net.Http.HttpRequestException ex) {
-            return ex.StatusCode == HttpStatusCode.Found;
+            return ex.StatusCode == System.Net.HttpStatusCode.Found;
         }
 
 
