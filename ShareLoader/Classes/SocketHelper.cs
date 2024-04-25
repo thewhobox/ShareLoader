@@ -32,6 +32,7 @@ namespace ShareLoader.Classes
                 case "register":
                     Console.WriteLine("Got new websocket connection");
                     Sockets.Add(new SocketItem(socket, int.Parse(paras[1]), int.Parse(paras[2]), paras[3]));
+                    _ = SendUpdate("{ \"type\": \"console\", \"text\": \"got register\" }", int.Parse(paras[1]), -1, "");
                     break;
             }
         }
@@ -112,7 +113,7 @@ namespace ShareLoader.Classes
 
         public async Task SendUpdate(string message, int id, int gid, string key)
         {
-            List<SocketItem> sockets = Sockets.Where(s => s.SubscribeKeys.Split('.').Contains(key) && ((s.Id == id || s.Gid == gid) || (s.Id == -1 && s.Gid == -1))).ToList();
+            List<SocketItem> sockets = Sockets.Where(s => s.SubscribeKeys.Split('.').Contains(key) && (s.Id == id || s.Gid == gid || (s.Id == -1 && s.Gid == -1))).ToList();
             List<SocketItem> toRemove = new List<SocketItem>();
             
             foreach (SocketItem item in sockets)
