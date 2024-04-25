@@ -264,7 +264,7 @@ function search() {
             let poster = item.Poster;
             if (poster == "N/A")
                 poster = "http://www.citypages.com/img/movie-placeholder.gif";
-            $("#searchResults").append('<img onerror="javascript:imgFail(this);" title="' + item.Title + '" alt="' + item.Title + '" src="' + poster + '" data-imdbid="' + item.imdbID + '" data-sort="' + item.Title + '" data-year="' + item.Year + '">');
+            $("#searchResults").append('<img onerror="javascript:imgFail(this);" title="' + item.Title + ' ' + item.Year + '" alt="' + item.Title + '" src="' + poster + '" data-imdbid="' + item.imdbID + '" data-sort="' + item.Title + '" data-year="' + item.Year + '">');
         }
         addClick();
         $("#searchBar").css("visibility", "hidden");

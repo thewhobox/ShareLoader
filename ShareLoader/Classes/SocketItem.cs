@@ -17,7 +17,7 @@ namespace ShareLoader.Classes
         {
             Socket = socket;
             Id = id;
-            gid = Gid;
+            Gid = gid;
             SubscribeKeys = keys;
         }
     }

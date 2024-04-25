@@ -13,8 +13,6 @@ namespace ShareLoader.Classes
     {
         public List<SocketItem> Sockets { get; set; } = new List<SocketItem>();
 
-        
-
         private static SocketHelper _instance;
         public static SocketHelper Instance
         {
@@ -32,18 +30,16 @@ namespace ShareLoader.Classes
             switch (paras[0])
             {
                 case "register":
+                    Console.WriteLine("Got new websocket connection");
                     Sockets.Add(new SocketItem(socket, int.Parse(paras[1]), int.Parse(paras[2]), paras[3]));
                     break;
             }
         }
 
-
-
         public async Task SendText(string text, DownloadItem item, string key)
         {
             await SendUpdate(text, item.Id, item.DownloadGroupID, key);
         }
-
 
         #region ItemDownload
         public async Task SendIDReset(DownloadItem item)
@@ -119,16 +115,17 @@ namespace ShareLoader.Classes
             List<SocketItem> sockets = Sockets.Where(s => s.SubscribeKeys.Split('.').Contains(key) && ((s.Id == id || s.Gid == gid) || (s.Id == -1 && s.Gid == -1))).ToList();
             List<SocketItem> toRemove = new List<SocketItem>();
             
-
             foreach (SocketItem item in sockets)
             {
                 if(item.Socket.State != WebSocketState.Open)
                 {
                     toRemove.Add(item);
+                    Console.WriteLine("Closing Socket due to wrong state: " + item.Socket.State.ToString());
                     continue;
                 }
                 var data = System.Text.Encoding.UTF8.GetBytes(message);
                 var buffer = new ArraySegment<Byte>(data);
+                Console.WriteLine($"sending to {id} {gid} {key}");
                 await item.Socket.SendAsync(buffer, WebSocketMessageType.Text, true, new System.Threading.CancellationToken());
             }
 

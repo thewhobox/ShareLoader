@@ -106,6 +106,9 @@ function connect() {
                 setVis(resp.id, "stop", true);
                 setVis(resp.id, "delete", false);
                 break;
+            case "console":
+                console.log(resp.text);
+                break;
         }
     };
 }
