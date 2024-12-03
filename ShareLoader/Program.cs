@@ -9,9 +9,13 @@ builder.Services.AddSingleton<IHostedService, ShareLoader.Background.BackgroundT
 
 using(ShareLoader.Data.DownloadContext context = new ShareLoader.Data.DownloadContext())
 {
+    Console.WriteLine("Migrating Database");
     try{
         context.Database.Migrate();
-    } catch{}
+    } catch (Exception ex) {
+        Console.WriteLine($"ERROR: {ex.Message}");
+        Console.WriteLine(ex.StackTrace);
+    }
 }
 
 var app = builder.Build();
