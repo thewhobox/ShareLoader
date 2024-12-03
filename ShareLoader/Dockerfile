@@ -42,4 +42,4 @@ COPY --from=publish /app/publish .
 ENV DDL_APIKEY=
 ENV OMDB_APIKEY=
 
-ENTRYPOINT ["./ShareLoader"]
+ENTRYPOINT ["dotnet", "ShareLoader.dll"]
