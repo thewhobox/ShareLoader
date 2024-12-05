@@ -6,7 +6,7 @@ public class BackgroundTasks : BackgroundService
 {
     public static BackgroundTasks Instance { get; set; }
 
-    AccountChecker account;
+    public AccountChecker account;
     DownloadChecker download;
     ExtractChecker extract;
     MoveChecker move;
@@ -15,17 +15,6 @@ public class BackgroundTasks : BackgroundService
     {
         Instance = this;
         System.Console.WriteLine("Starte BackgroundTasker");
-
-
-        using(Data.DownloadContext context = new Data.DownloadContext())
-        {
-            foreach(DownloadItem item in context.Items.Where(i => i.State == States.Downloading || i.State == States.Extracting || i.State == States.Moving).ToList())
-            {
-                item.State = States.Error;
-                context.Items.Update(item);
-            }
-            context.SaveChanges();
-        }
 
         account = new AccountChecker();
         download = new DownloadChecker(account);

@@ -103,6 +103,7 @@ function groupLinks() {
         Object.keys(group).forEach(key2 => {
             let ele = group[key2];
             ele.groupId = idCounter;
+            console.log(ele);
             $("#LinkGrid").append('<li data-json=\'' + JSON.stringify(ele) + '\' data-group="' + idCounter + '" class="collection-item avatar"><i class="material-icons circle ' + (ele.isOnline ? 'green' : 'red') + '">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label></div></li>')
         });
         idCounter++;
@@ -163,7 +164,7 @@ function getInfoDDL(url) {
         $("div.size", ele).html(Math.round(size) + " " + expos[expo]);
 
         items.push({
-            "id": id,
+            "id": data.id,
             "isOnline": data.isOnline,
             "name": data.name,
             "size": data.size,

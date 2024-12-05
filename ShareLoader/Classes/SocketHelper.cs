@@ -126,7 +126,6 @@ namespace ShareLoader.Classes
                 }
                 var data = System.Text.Encoding.UTF8.GetBytes(message);
                 var buffer = new ArraySegment<Byte>(data);
-                Console.WriteLine($"sending to {id} {gid} {key}");
                 await item.Socket.SendAsync(buffer, WebSocketMessageType.Text, true, new System.Threading.CancellationToken());
             }
 

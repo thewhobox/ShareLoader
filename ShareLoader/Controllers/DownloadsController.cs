@@ -58,7 +58,7 @@ public class DownloadsController : Controller
         if(group == null) return NotFound();
 
         IEnumerable<DownloadItem> items = _context.Items.Where(i => i.DownloadGroupID == group.Id);
-        string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
+        string downloadPath = @"C:\Users\u6\Desktop"; // SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
         long size = 0;
         foreach(DownloadItem item in items)
         {

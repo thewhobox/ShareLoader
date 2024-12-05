@@ -70,6 +70,17 @@ public class DownloadChecker
     bool flag2 = false;
     private async void Check()
     {
+        using(Data.DownloadContext context = new Data.DownloadContext())
+        {
+            foreach(DownloadItem item in context.Items.Where(i => i.State == States.Downloading || i.State == States.Extracting || i.State == States.Moving).ToList())
+            {
+                item.State = States.Error;
+                context.Items.Update(item);
+                context.Errors.Add(new ErrorModel() { GroupId = item.DownloadGroupID, ItemId = item.Id, Text = "Startup: Datei hatte den Status Downloading", FileName = item.Name });
+            }
+            context.SaveChanges();
+        }
+
         while(true)
         {
             await Task.Delay(TimeSpan.FromSeconds(10));

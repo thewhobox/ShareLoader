@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using ShareLoader.Classes;
 
 namespace ShareLoader.Models;
@@ -16,6 +17,8 @@ public class AccountModel
     public DateTime ValidTill { get; set; }
     public float Credit { get; set; }
     public string Hoster { get; set; } = "";
+    [NotMapped]
+    public string Token { get; set; } = "";
     public bool AllowClientRedirect { get; set; } = true; //Todo remove
 
     public bool IsValid()

@@ -72,6 +72,13 @@ public class AccountChecker
         return profile;
     }
 
+    public AccountProfile? GetProfileAny(string hoster)
+    {
+        //TODO also check if enough traffic left
+        AccountProfile? profile =  Profiles.Values.FirstOrDefault(p => p.Model.Hoster == hoster && p.IsLoggedIn);
+        return profile;
+    }
+
     private async Task Login(AccountModel acc)
     {
         AccountProfile profile = new AccountProfile(acc);

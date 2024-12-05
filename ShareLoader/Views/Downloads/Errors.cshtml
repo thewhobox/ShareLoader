@@ -15,7 +15,7 @@
             <i class="material-icons circle red">warning_amber</i>
             <span class="title">@error.FileName</span>
             <p>
-                @Html.Raw(error.Text.Replace("\r\n", "<br />"));
+                @Html.Raw(error.Text.Replace("\r\n", "<br />"))
             </p>
             <div class="secondary-content">
                 <a asp-controller="Downloads" asp-action="DeleteError" asp-route-id="@error.Id" data-action="delete" title="Fehler löschen"><i class="material-icons">delete_forever</i></a>
