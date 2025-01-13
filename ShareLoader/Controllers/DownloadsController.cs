@@ -49,6 +49,7 @@ public class DownloadsController : Controller
         }
 
         _context.SaveChanges();
+        latestCheck = null;
         return RedirectToAction("Detail", new { id = group.Id });
     }
 
@@ -156,9 +157,18 @@ public class DownloadsController : Controller
     public async Task<IActionResult> GetItemInfo(string url)
     {
         IDownloadManager down = DownloadHelper.GetDownloader(url);
-        string id = down.GetItemId(url);
-        ItemModel item = await down.GetItemInfo(id);
-        return Ok(item);
+        try{
+            string id = down.GetItemId(url);
+            ItemModel item = await down.GetItemInfo(id);
+            return Ok(item);
+        } catch (Exception ex) {
+
+        }
+        ItemModel error = new ItemModel();
+        error.Url = url;
+        error.IsOnline = false;
+        error.Downloader = down.Identifier;
+        return Ok(error);
     }
 
     public IActionResult GetGroupsInfo()
@@ -191,7 +201,24 @@ public class DownloadsController : Controller
             await Background.BackgroundTasks.Instance.StopDownload(item);
             
         string downloadPath = SettingsHelper.GetSetting<SettingsModel>("settings").DownloadFolder;
-        System.IO.Directory.Delete(System.IO.Path.Combine(downloadPath, group.Id.ToString()), true);
+
+        try
+        {
+            Directory.Delete(Path.Combine(downloadPath, group.Id.ToString()), true);
+        } catch (Exception ex) {
+            Console.WriteLine(ex.Message);
+            foreach(string file in Directory.GetFiles(Path.Combine(downloadPath, group.Id.ToString())))
+            {
+                System.IO.File.Delete(file);
+            }
+            try
+            {
+                Directory.Delete(Path.Combine(downloadPath, group.Id.ToString()), true);
+            } catch(Exception ex2) {
+                Console.WriteLine(ex2.Message);
+                return DeleteError(group.Id);
+            }
+        }
 
         return RedirectToAction("Index");
     }
@@ -354,8 +381,14 @@ public class DownloadsController : Controller
         {
             content = reader.ReadToEnd();
         }
-        
-        latestCheck = DecryptHelper.DecryptContainer(content);
+        if(file.FileName.EndsWith(".dlc"))
+            latestCheck = DecryptHelper.DecryptContainer(content);
+        else {
+            CheckViewModel model = new CheckViewModel();
+            model.Name = "Einzellinks";
+            model.RawLinks = content.Replace("\r\n", ",").Replace("\r", ",");
+            latestCheck = model;
+        }
         return RedirectToAction("Add");
     }
 }

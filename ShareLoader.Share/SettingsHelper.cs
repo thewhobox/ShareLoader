@@ -51,7 +51,7 @@ public class SettingsHelper
             Console.WriteLine("/shareloader/ doesnt exist");
             FilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "settings.txt");
         }
-        Console.WriteLine("Using: " + FilePath);
+        
         if(!System.IO.File.Exists(FilePath))
         {
             Console.WriteLine("file doesnt exist");

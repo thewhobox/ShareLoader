@@ -19,7 +19,6 @@ public class DownloadContext : DbContext
             Console.WriteLine("/shareloader/ doesnt exist");
             databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database.db");
         }
-        Console.WriteLine("Using: " + databasePath);
     }
     public DownloadContext(DbContextOptions<DownloadContext> options) : base(options)
     {
@@ -27,7 +26,6 @@ public class DownloadContext : DbContext
         {
             Console.WriteLine("/shareloader/ doesnt exist");
             databasePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "database.db");
-            Console.WriteLine("Using: " + databasePath);
         }
     }
 

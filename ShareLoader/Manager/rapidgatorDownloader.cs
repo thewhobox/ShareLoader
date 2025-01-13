@@ -29,6 +29,8 @@ public class rapidgatorDownloader : IDownloadManager
     public async Task<ItemModel> GetItemInfo(string Id)
     {
         ItemModel item = new ItemModel() { Id = Id };
+        item.Url = $"https://rapidgator.net/file/{Id}";
+        item.Downloader = "rpg";
 
         Background.AccountChecker account = Background.BackgroundTasks.Instance.account;
         AccountProfile? profile = account.GetProfileAny("rpg");
@@ -39,7 +41,25 @@ public class rapidgatorDownloader : IDownloadManager
 
         HttpClient clientPublic = new HttpClient();
 
-        string response = await clientPublic.GetStringAsync($"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}");
+        string response = "";
+        int retryCount = 2;
+        while(retryCount-- > 0)
+        {
+            try {
+                System.Diagnostics.Debug.WriteLine("Requesting: " + $"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}");
+                CancellationTokenSource cts = new CancellationTokenSource(3000);
+                response = await clientPublic.GetStringAsync($"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}", cts.Token);
+                break;
+            } catch {
+                // just retry it
+            }
+        }
+        if(string.IsNullOrEmpty(response))
+        {
+            item.IsOnline = false;
+            return item;
+        }
+        
         JObject jresp = JObject.Parse(response);
         if(jresp["status"].ToString() != "200")
         {
@@ -50,8 +70,6 @@ public class rapidgatorDownloader : IDownloadManager
         item.IsOnline = true;
         item.Name = jresp["response"]["file"]["name"].ToString();
         item.Size = long.Parse(jresp["response"]["file"]["size"].ToString());
-        item.Downloader = "rpg";
-        item.Url = $"https://rapidgator.net/file/{Id}";
         return item;
     }
 

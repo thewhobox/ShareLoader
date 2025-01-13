@@ -78,7 +78,7 @@ function groupLinks() {
         {
             offlineCounter++;
             $("#LinkGridOffline").css("display", "block")
-            $("#LinkGridOffline").append('<li class="collection-item">' + items[key].downloader + ' - <a href="' + items[key].url + '">' + items[key].id + '</a></li>')
+            $("#LinkGridOffline").append('<li class="collection-item">' + items[key].downloader + ' - <a href="' + items[key].url + '" target="_blank">' + items[key].id + '</a></li>')
             return;
         }
         if(pattern1.test(name)) {
