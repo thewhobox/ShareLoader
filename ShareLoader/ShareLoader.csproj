@@ -8,6 +8,7 @@
     <PublishSingleFile>true</PublishSingleFile>
     <PublishReadyToRun>true</PublishReadyToRun>
     <NoWarn>8602</NoWarn>
+    <Version>1.0.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>

@@ -20,6 +20,15 @@ public class SettingsController : Controller
     public IActionResult Index()
     {
         SettingsModel model = SettingsHelper.GetSetting<SettingsModel>("settings") ?? new SettingsModel();
+        var assembly = System.Reflection.Assembly.GetEntryAssembly();
+        if(assembly != null)
+        {
+            var vers = assembly.GetName().Version;
+            if(vers != null)
+            {
+                ViewData["Version"] = "v" + string.Join('.', vers.ToString().Split('.').Take(3));
+            }
+        }
         return View(model);
     }
 

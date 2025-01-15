@@ -1,7 +1,9 @@
 @model SettingsModel
 @{
-    ViewData["Title"] = "Einstellungen";
+    ViewData["Title"] = "Einstellungen - " + ViewData["Version"];
 }
+
+
 
 <form asp-action="Index" data-role="validator" method="post" enctype="multipart/form-data">
     <div class="row">
