@@ -148,7 +148,7 @@ function getInfoDDL(url) {
         id = id.substring(0, id.indexOf('/'));
         
     console.log(id);
-    $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), function (data) {
+    $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
         let ele = $("div.row[data-id=" + id + "]");
         $("div.state", ele).html(data.isOnline ? "Online" : "Offline");
         $("div.name", ele).html(data.name);
@@ -172,6 +172,7 @@ function getInfoDDL(url) {
             "downloader": data.downloader,
             "url": data.url
         });
+        await new Promise(r => setTimeout(r, 200));
         checkLinks();
     });
 }
