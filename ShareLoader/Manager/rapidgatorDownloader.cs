@@ -36,27 +36,34 @@ public class rapidgatorDownloader : IDownloadManager
         AccountProfile? profile = account.GetProfileAny("rpg");
         if(profile == null) {
             item.IsOnline = false;
+            System.Diagnostics.Debug.WriteLine("Profile is null");
             return item;
         }
 
         HttpClient clientPublic = new HttpClient();
 
         string response = "";
-        int retryCount = 2;
+        int retryCount = 5;
         while(retryCount-- > 0)
         {
             try {
                 System.Diagnostics.Debug.WriteLine("Requesting: " + $"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}");
-                CancellationTokenSource cts = new CancellationTokenSource(3000);
-                response = await clientPublic.GetStringAsync($"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}", cts.Token);
+                //CancellationTokenSource cts = new CancellationTokenSource(5000);
+                HttpResponseMessage httpResponseMessage = await clientPublic.GetAsync($"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}"); //, cts.Token);
+                System.Diagnostics.Debug.WriteLine("Response: " + httpResponseMessage.StatusCode);
+                response = await httpResponseMessage.Content.ReadAsStringAsync();
+                //response = await clientPublic.GetStringAsync($"https://rapidgator.net/api/v2/file/info?token={profile.Model.Token}&file_id={Id}", cts.Token);
                 break;
-            } catch {
+            } catch(Exception ex) {
                 // just retry it
+                System.Diagnostics.Debug.WriteLine("Error: " + ex.Message);
+                await Task.Delay(2000);
             }
         }
         if(string.IsNullOrEmpty(response))
         {
             item.IsOnline = false;
+            System.Diagnostics.Debug.WriteLine("Response is empty");
             return item;
         }
         
@@ -64,6 +71,7 @@ public class rapidgatorDownloader : IDownloadManager
         if(jresp["status"].ToString() != "200")
         {
             item.IsOnline = false;
+            System.Diagnostics.Debug.WriteLine("Status is not 200 (" + jresp["status"].ToString() + ")");
             return item;
         }
 

@@ -140,16 +140,10 @@ function groupLinks() {
 }
 
 function getInfoDDL(url) {
-    let domain = url.substring(8);
-    domain = domain.substring(0, domain.indexOf('/'));
-    domain = domain.replace('.', "%2E");
-    let id = url.substring(7 + domain.length);
-    if(id.indexOf('/') != -1)
-        id = id.substring(0, id.indexOf('/'));
-        
-    console.log(id);
+    console.log(url);
     $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
-        let ele = $("div.row[data-id=" + id + "]");
+        console.log(data);
+        let ele = $("div.row[data-id=" + data.id + "]");
         $("div.state", ele).html(data.isOnline ? "Online" : "Offline");
         $("div.name", ele).html(data.name);
 
@@ -172,7 +166,7 @@ function getInfoDDL(url) {
             "downloader": data.downloader,
             "url": data.url
         });
-        await new Promise(r => setTimeout(r, 200));
+        await new Promise(r => setTimeout(r, 1000));
         checkLinks();
     });
 }
