@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ShareLoader.CNL.Classes;
 using ShareLoader.Share;
@@ -107,7 +107,9 @@ public class flashController : Controller
         string host = SettingsHelper.GetSetting("host");
 
         try {
-            var res = await client.GetStringAsync(host + "/Downloads/ApiAdd?links=" + linksb64);
+            HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, host + "/Downloads/ApiAdd");
+            requestMessage.Content = new StringContent(linksb64, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
+            var res = client.SendAsync(requestMessage);
             var ps = new ProcessStartInfo(host + "/Downloads/Add")
             { 
                 UseShellExecute = true, 

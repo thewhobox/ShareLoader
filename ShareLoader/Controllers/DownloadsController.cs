@@ -363,8 +363,14 @@ public class DownloadsController : Controller
         return Ok("ShareLoader");
     }
 
-    public IActionResult ApiAdd(string links)
+    [HttpPost]
+    public async Task<IActionResult> ApiAdd()
     {
+        string links = "";
+        using (var reader = new StreamReader(HttpContext.Request.Body))
+        {
+            links = await reader.ReadToEndAsync();
+        }
         System.Console.WriteLine("ApiAdd2");
         byte[] linksb64 = System.Convert.FromBase64String(links);
         var plainTextBytes = System.Text.Encoding.UTF8.GetString(linksb64);
