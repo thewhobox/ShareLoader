@@ -14,13 +14,13 @@
     <button type="submit" class="btn btn-primary">Anwenden</button>
 </form>
 <br />
-@if(ViewData["updated"] == "true")
+@if(ViewData["updated"]?.ToString() == "true")
 {
     <div class="alert alert-success" role="alert">
     Einstellungen wurde aktualisiert.
     </div>
 }
-@if(ViewData["auto"] == "true")
+@if(ViewData["auto"]?.ToString() == "true")
 {
     <div class="alert alert-info" role="alert">
         Der Host wurde automatisch gefunden.

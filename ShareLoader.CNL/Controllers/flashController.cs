@@ -16,8 +16,6 @@ public class flashController : Controller
 
     public static bool updated = false;
 
-    static CheckViewModel model;
-
     public async Task<IActionResult> Settings()
     {
         if(updated)
@@ -46,7 +44,7 @@ public class flashController : Controller
                         ViewData["updated"] = "false";
                         host = url;
                         SettingsHelper.SetSetting("host", url);
-                        BackgroundWatcher.Instance.StartWatcher();
+                        BackgroundWatcher.Instance?.StartWatcher();
                         break;
                     }
                 } catch {}
@@ -56,7 +54,7 @@ public class flashController : Controller
         {
             download = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
             SettingsHelper.SetSetting("download", download);
-            BackgroundWatcher.Instance.StartWatcher();
+            BackgroundWatcher.Instance?.StartWatcher();
         }
 
         ViewData["MainUrl"] = host;
@@ -69,20 +67,27 @@ public class flashController : Controller
     {
         SettingsHelper.SetSetting("host", url);
         SettingsHelper.SetSetting("download", download);
-        BackgroundWatcher.Instance.StartWatcher();
+        BackgroundWatcher.Instance?.StartWatcher();
         updated = true;
         return RedirectToAction("Settings");
     }
 
     public async Task<IActionResult> addcrypted2()
     {
-        string jk = Request.Form["jk"];
+        string? jk = Request.Form["jk"];
+        if(string.IsNullOrEmpty(jk))
+            return RedirectToAction("error", new { id = 2, message = "No jk found." });
         jk = jk.Substring(jk.IndexOf('\'') + 1);
         jk = jk.Substring(0, jk.IndexOf('\''));
-        string passwords = Request.Form["passwords"];
-        string source = Request.Form["source"];
-        string package = Request.Form["package"];
-        string crypted = Request.Form["crypted"];
+        string passwords = Request.Form.ContainsKey("passwords") ? Request.Form["passwords"].ToString() : "";
+        Console.WriteLine("Passwords: " + passwords);
+        string? source = Request.Form["source"];
+        Console.WriteLine("Source: " + source);
+        string package = Request.Form.ContainsKey("package") ? Request.Form["package"].ToString() : "Unknown";
+        string? crypted = Request.Form["crypted"];
+
+        if(string.IsNullOrEmpty(crypted))
+            return RedirectToAction("error", new { id = 2, message = "No crypted links found." });
 
         jk = jk.ToUpper();
         string decKey = "";
@@ -91,9 +96,13 @@ public class flashController : Controller
             decKey += (char)Convert.ToUInt16(jk.Substring(i, 2), 16);
         }
 
-        string[] links = DecryptHelper.Decrypt(Convert.FromBase64String(crypted), decKey).Split("\r\n");
+        string linksS = DecryptHelper.Decrypt(Convert.FromBase64String(crypted), decKey);
+        Console.WriteLine(linksS);
+        string[] links = linksS.Split("\r\n");
+        Console.WriteLine("Links: " + links.Length);
 
-        model = new CheckViewModel() { 
+
+        CheckViewModel model = new CheckViewModel() { 
             Name = package,
             RawLinks = string.Join(",", links)
         };
@@ -109,7 +118,7 @@ public class flashController : Controller
         try {
             HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Post, host + "/Downloads/ApiAdd");
             requestMessage.Content = new StringContent(linksb64, System.Text.Encoding.UTF8, "application/x-www-form-urlencoded");
-            var res = client.SendAsync(requestMessage);
+            var res = await client.SendAsync(requestMessage);
             var ps = new ProcessStartInfo(host + "/Downloads/Add")
             { 
                 UseShellExecute = true, 
@@ -126,8 +135,6 @@ public class flashController : Controller
             Process.Start(ps);
         }
 
-        
-
         return Ok();
     }
 
@@ -137,6 +144,10 @@ public class flashController : Controller
         {
             case 1:
                 ViewData["msg"] = "Der angegebene Host ist nicht erreichbar.";
+                break;
+
+            case 2:
+                ViewData["msg"] = "Es trat ein Fehler beim Entschlüsseln der Links auf.";
                 break;
 
             default:

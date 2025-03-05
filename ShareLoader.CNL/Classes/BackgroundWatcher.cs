@@ -5,9 +5,9 @@ using System.Diagnostics;
 
 public class BackgroundWatcher : BackgroundService
 {
-    public static BackgroundWatcher Instance { get; set; }
+    public static BackgroundWatcher? Instance { get; set; }
     
-    private FileSystemWatcher watcher = null;
+    private FileSystemWatcher? watcher = null;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -44,11 +44,11 @@ public class BackgroundWatcher : BackgroundService
         watcher.EnableRaisingEvents = true;
     }
 
-    private static string lastFile;
+    private static string lastFile = "";
 
     private static async void OnChanged(object sender, FileSystemEventArgs e)
     {
-        if (lastFile == e.Name || e.ChangeType != WatcherChangeTypes.Changed)
+        if (lastFile == e.Name || e.ChangeType != WatcherChangeTypes.Changed || string.IsNullOrEmpty(e.Name))
         {
             return;
         }
