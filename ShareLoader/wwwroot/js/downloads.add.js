@@ -139,6 +139,8 @@ function groupLinks() {
     $("#submit").removeClass("disabled");
 }
 
+var getInfoRetries = 0;
+
 function getInfoDDL(url) {
     console.log(url);
     $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
@@ -168,6 +170,14 @@ function getInfoDDL(url) {
         });
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
+    }).fail(function() {
+        getInfoRetries++;
+        if(getInfoRetries > 2)
+        {
+            console.error("Fehler beim Abrufen. Kein Retry");
+            checkLinks();
+        }
+        console.error("Fehler beim Abrufen. Retry: " + getInfoRetries);
     });
 }
 
