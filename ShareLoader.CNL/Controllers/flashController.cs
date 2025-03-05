@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ShareLoader.CNL.Classes;
 using ShareLoader.Share;
@@ -116,8 +116,9 @@ public class flashController : Controller
                 Verb = "open" 
             };
             Process.Start(ps);
-        } catch{
-            var ps = new ProcessStartInfo("http://localhost:9666/flash/error/1")
+        } catch(Exception ex) {
+            Console.WriteLine("Host not reachable: " + ex.Message);
+            var ps = new ProcessStartInfo("http://localhost:9666/flash/error/1?message=" + (System.Web.HttpUtility.UrlEncode(ex.Message) ?? "Undefined"))
             { 
                 UseShellExecute = true, 
                 Verb = "open" 
@@ -130,7 +131,7 @@ public class flashController : Controller
         return Ok();
     }
 
-    public IActionResult error(int id)
+    public IActionResult error(int id, string message)
     {
         switch(id)
         {
@@ -142,6 +143,7 @@ public class flashController : Controller
                 ViewData["msg"] = "Es trat ein unbekannter Fehler auf.";
                 break;
         }
+        ViewData["error"] = message;
         return View();
     }
 }
