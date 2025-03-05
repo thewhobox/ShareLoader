@@ -9,10 +9,15 @@ let items = [];
 $(document).ready(function () {
     checkSearch();
     checkSeason();
-    checkLinks();
+    startCheckLinks();
 
     $("#submit").click(e => {
         checkSubmit();
+    });
+
+    $("#resetRestore").click(e => {
+        localStorage.clear();
+        startCheckLinks();
     });
 });
 
@@ -42,7 +47,7 @@ function checkSubmit() {
     $("#LinkGrid li.collection-item").each((index, target) => {
         let ele = JSON.parse($(target).attr("data-json"));
         console.log(ele);
-        if($("input", target).is(":checked"))
+        if($("input", target).is(":checked") && ele.isOnline)
         {
             Object.keys(ele).forEach(key => {
                 $("#linkForm").append('<input type="hidden" name="Links[' + itemCount + '].' + key + '" value="' + ele[key] + '" />')
@@ -51,6 +56,39 @@ function checkSubmit() {
         }
     });
     $("#linkForm").submit();
+}
+
+function startCheckLinks()
+{
+    $("#LinkGrid").html("");
+    var savedName = localStorage.getItem("name");
+    console.log(savedName + " - " + $("#Name").val());
+    items = [];
+    if(savedName == $("#Name").val())
+    {
+        currentIndex = 0;
+        console.log("Restoring " + (parseInt(localStorage.getItem("currentCheckIndex")) + 1) + " Items");
+        checkRestore();
+    } else {
+        localStorage.clear();
+        localStorage.setItem("name", $("#Name").val());
+        localStorage.setItem("currentCheckIndex", 0);
+        currentCheckIndex = 0;
+        checkLinks();
+    }
+}
+
+function checkRestore()
+{
+    let perc = Math.round((100 / links.length) * currentCheckIndex);
+    $("#progressbar").css("width", perc + "%");
+    if(currentCheckIndex > parseInt(localStorage.getItem("currentCheckIndex")))
+    {
+        checkLinks();
+        return;
+    }
+    console.log("Restoring: " + (currentCheckIndex + 1) + "/" + (parseInt(localStorage.getItem("currentCheckIndex"))+1));
+    restoreInfoDDL(currentCheckIndex);
 }
 
 function checkLinks() {
@@ -66,23 +104,24 @@ function checkLinks() {
     let item = links[currentCheckIndex];
     getInfoRetries = 0;
     getInfoDDL(item);
-    currentCheckIndex++;
 }
 
 function groupLinks() {
     let groups = {};
     let offlineCounter = 0;
     let pattern1 = /\.part[0-9]+\.rar/;
+    $("#LinkGrid").html("");
     Object.keys(items).forEach(key => {
         let name = items[key].name;
         if(!items[key].isOnline)
         {
             offlineCounter++;
-            $("#LinkGridOffline").css("display", "block")
-            $("#LinkGridOffline").append('<li class="collection-item">' + items[key].downloader + ' - <a href="' + items[key].url + '" target="_blank">' + items[key].id + '</a></li>')
-            return;
+            items[key].name = items[key].id + " (Offline)";
+            if(groups["Offline"] == undefined)
+                groups["Offline"] = {};
+            groups["Offline"][key] = items[key];
         }
-        if(pattern1.test(name)) {
+        else if(pattern1.test(name)) {
             let group = name.substring(0, name.search(pattern1));
             console.log(name + " -> " + group);
             if(groups[group] == undefined)
@@ -105,7 +144,7 @@ function groupLinks() {
             let ele = group[key2];
             ele.groupId = idCounter;
             console.log(ele);
-            $("#LinkGrid").append('<li data-json=\'' + JSON.stringify(ele) + '\' data-group="' + idCounter + '" class="collection-item avatar"><i class="material-icons circle ' + (ele.isOnline ? 'green' : 'red') + '">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label></div></li>')
+            $("#LinkGrid").append('<li id="' + ele.id + '" data-json"' + JSON.stringify(ele) + '" data-group="' + idCounter + '" class="collection-item avatar ' + (ele.isOnline ? 'online' : 'offline') + '"><i class="material-icons circle">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label class="checkbox"><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label><label class="button"><a class="waves-effect waves-light btn-small" data-id="' + ele.id + '"><i class="material-icons left">refresh</i>Reload</a></label></div></li>')
         });
         idCounter++;
     });
@@ -138,18 +177,29 @@ function groupLinks() {
     if(offlineCounter > 0)
         alert("Es sind " + offlineCounter + " Dateien offline!");
     $("#submit").removeClass("disabled");
+
+    $("label.button a").click(e => {
+        let id = $(e.currentTarget).attr("data-id");
+        let item = items.find(x => x.id == id);
+        reloadInfoDDL(item);
+    });
 }
 
 var getInfoRetries = 0;
 
-function getInfoDDL(url) {
-    console.log(url);
-    $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
-        console.log(data);
-        let ele = $("div.row[data-id=" + data.id + "]");
-        $("div.state", ele).html(data.isOnline ? "Online" : "Offline");
-        $("div.name", ele).html(data.name);
+function restoreInfoDDL(index)
+{
+    var data = JSON.parse(localStorage.getItem(index));
+    items.push(data);
+    console.log(data);
+    currentCheckIndex++;
+    checkRestore();
+}
 
+function reloadInfoDDL(item)
+{
+    $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(item.url), async function (data) {
+        console.log(data);
         let expos = [ "B", "KB", "MB", "GB" ];
         let expo = 0;
         let size = data.size;
@@ -158,9 +208,43 @@ function getInfoDDL(url) {
             expo++;
             size = size / 1024;
         }
-        $("div.size", ele).html(Math.round(size) + " " + expos[expo]);
 
-        items.push({
+        item.id = data.id;
+        item.isOnline = true; //data.isOnline;
+        item.name = "new name"; // data.name;
+        item.size = data.size;
+        item.sizeRead = Math.round(size) + " " + expos[expo];
+        item.downloader = data.downloader;
+        item.url = data.url;
+        console.log(item.index);
+        localStorage.setItem(item.index, JSON.stringify(item));
+
+        var ele = $("#" + item.id);
+        ele.attr("data-json", JSON.stringify(item));
+        if(item.isOnline)
+            ele.removeClass("offline").addClass("online");
+        else
+            ele.removeClass("online").addClass("offline");
+        $("input[type=checkbox]", ele).prop("checked", item.isOnline);
+        $("span.title", ele).html(item.name);
+
+        groupLinks();
+    });
+}
+
+function getInfoDDL(url) {
+    $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
+        let expos = [ "B", "KB", "MB", "GB" ];
+        let expo = 0;
+        let size = data.size;
+        while(size >= 1024)
+        {
+            expo++;
+            size = size / 1024;
+        }
+
+        var item = {
+            "index": currentCheckIndex,
             "id": data.id,
             "isOnline": data.isOnline,
             "name": data.name,
@@ -168,7 +252,12 @@ function getInfoDDL(url) {
             "sizeRead": Math.round(size) + " " + expos[expo],
             "downloader": data.downloader,
             "url": data.url
-        });
+        };
+        items.push(item);
+        localStorage.setItem("currentCheckIndex", currentCheckIndex);
+        localStorage.setItem(currentCheckIndex, JSON.stringify(item));
+        currentCheckIndex++;
+        console.log(currentCheckIndex + "/" + links.length);
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
     }).fail(function() {
@@ -179,6 +268,7 @@ function getInfoDDL(url) {
             checkLinks();
         }
         console.error("Fehler beim Abrufen. Retry: " + getInfoRetries);
+        getInfoDDL();
     });
 }
 
@@ -198,7 +288,6 @@ function checkSearch() {
     switch ($("#Type").val()) {
         case "1":
             stype = "movie";
-            console.log("Film");
             $("#inSearch").removeAttr('disabled');
             $("#inSeasonD").css("display", "none");
             $("#NameToSort").removeAttr('disabled');
@@ -206,7 +295,6 @@ function checkSearch() {
             break;
         case "2":
             stype = "series";
-            console.log("Serie");
             $("#inSearch").removeAttr('disabled');
             $("#inSeasonD").css("display", "block");
             $("#NameToSort").removeAttr('disabled');
@@ -214,11 +302,11 @@ function checkSearch() {
             break;
         case "3":
             stype = "";
-            console.log("Anderes");
             $("#inSearch").attr('disabled', 'disabled');
             $("#inSeasonD").css("display", "none");
             $("#NameToSort").attr('disabled', 'disabled');
             $("#NameToSort").removeAttr('data-validate');
+            $("#NameToSort").val("");
             break;
         default:
             $("#inSearch").attr('disabled', 'disabled');
@@ -250,7 +338,6 @@ function search() {
     $("#searchBar").css("visibility", "visible");
     let query = $("#inSearch").val();
     $.getJSON(window.location.origin + "/Downloads/GetSearchResults?query=" + query + "&page=" + currentPage + "&type=" + stype, function (data) {
-        console.log(data);
         $("#searchResults").html("");
         if (data.Response == "False") {
             currentPage = 0;
@@ -372,8 +459,6 @@ function setName(name = "", year = 0) {
             sort = sort.replace(" ", ".");
         }
     }
-    
-    
-    
+
     $("input[name=NameToSort]").attr("value", sort);
 }
