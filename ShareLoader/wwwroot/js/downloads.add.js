@@ -64,6 +64,7 @@ function checkLinks() {
         return;
     }
     let item = links[currentCheckIndex];
+    getInfoRetries = 0;
     getInfoDDL(item);
     currentCheckIndex++;
 }
