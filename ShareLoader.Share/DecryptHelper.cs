@@ -90,19 +90,26 @@ public class DecryptHelper
 
 
         XDocument xml = XDocument.Parse(links_dec);
-        XElement package = xml.Element("dlc").Element("content").Element("package");
+        XElement? package = xml.Element("dlc")?.Element("content")?.Element("package");
+        if (package == null)
+        {
+            return new CheckViewModel();
+        }
 
         List<string> urls = new List<string>();
         foreach (XElement file in package.Elements("file"))
         {
-            string fileUrl = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(file.Element("url").Value));
+            XElement? urlEle = file.Element("url");
+            if(urlEle == null)
+                continue;
+            string fileUrl = System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(urlEle.Value));
             urls.Add(fileUrl);
         }
 
         
         CheckViewModel model = new CheckViewModel() 
         {
-            Name = package.Attribute("name") != null ? System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(package.Attribute("name").Value)).Trim() : "",
+            Name = package.Attribute("name") != null ? System.Text.Encoding.UTF8.GetString(Convert.FromBase64String(package.Attribute("name")?.Value ?? "Unknown")).Trim() : "",
             RawLinks = string.Join(',', urls)
         };
         SearchHelper.GetSearch(model);
