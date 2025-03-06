@@ -56,7 +56,7 @@ public class ExtractChecker
                         if(igroup.Count() > 1)
                         {
                             Regex reg = new Regex(@"\.part([0]{0,})1\.rar");
-                            _currentItem = igroup.Single(i => reg.IsMatch(i.Name));
+                            _currentItem = igroup.First(i => reg.IsMatch(i.Name));
                         } else {
                             _currentItem = igroup.ElementAt(0);
                         }

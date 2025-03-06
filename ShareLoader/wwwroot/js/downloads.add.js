@@ -57,6 +57,7 @@ function checkSubmit() {
             itemCount++;
         }
     });
+    console.log("Items: " + itemCount);
     $("#linkForm").submit();
 }
 
@@ -290,15 +291,11 @@ function getInfoDDL(url) {
         
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
-    }).fail(function() {
-        getInfoRetries++;
-        if(getInfoRetries > 2)
-        {
-            console.error("Fehler beim Abrufen. Kein Retry");
-            checkLinks();
-        }
-        console.error("Fehler beim Abrufen. Retry: " + getInfoRetries);
-        getInfoDDL();
+    }).fail(async function() {
+        offlineCounter++;
+        $("#progressbar").addClass("red");
+        await new Promise(r => setTimeout(r, 1000));
+        checkLinks();
     });
 }
 
