@@ -229,20 +229,12 @@ function reloadInfoDDL(item)
 {
     $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(item.url), async function (data) {
         console.log(data);
-        let expos = [ "B", "KB", "MB", "GB" ];
-        let expo = 0;
-        let size = data.size;
-        while(size >= 1024)
-        {
-            expo++;
-            size = size / 1024;
-        }
 
         item.id = data.id;
         item.isOnline = data.isOnline;
         item.name = data.name;
         item.size = data.size;
-        item.sizeRead = Math.round(size) + " " + expos[expo];
+        item.sizeRead = getSize(data.size);
         item.downloader = data.downloader;
         item.url = data.url;
         console.log(item.index);
