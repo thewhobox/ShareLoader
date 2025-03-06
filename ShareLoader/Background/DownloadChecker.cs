@@ -83,8 +83,8 @@ public class DownloadChecker
 
         while(true)
         {
-            await Task.Delay(TimeSpan.FromSeconds(1));
-            SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
+            await Task.Delay(TimeSpan.FromSeconds(3));
+            SettingsModel? settings = SettingsHelper.GetSetting<SettingsModel>("settings");
             if(settings == null || _currentItems.Count >= settings.MaxDownloads) continue;
 
 
@@ -130,6 +130,7 @@ public class DownloadChecker
 
     private async void DoDownload(DownloadModel model)
     {
+        if(model.Item == null || model.Manager == null || model.Profile == null) return;
         ChangeItemState(model.Item, States.Downloading);
         System.Console.WriteLine($"Downloading now: {model.Item.ItemId} ({model.Item.Name}) with hoster {model.Manager.Identifier}");
         bool acceptRange = await model.Manager.CheckStreamRange(model.Item, model.Profile);
@@ -230,8 +231,8 @@ public class DownloadChecker
 
 public class DownloadModel
 {
-    public DownloadItem Item { get; set; }
-    public IDownloadManager Manager { get; set; }
-    public AccountProfile Profile { get; set; }
+    public DownloadItem? Item { get; set; }
+    public IDownloadManager? Manager { get; set; }
+    public AccountProfile? Profile { get; set; }
     public CancellationTokenSource Token { get; set; } = new CancellationTokenSource();
 }
