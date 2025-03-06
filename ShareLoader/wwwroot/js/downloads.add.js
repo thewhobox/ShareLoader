@@ -5,6 +5,8 @@ let currentPage = 0;
 let totalPage = 0;
 let currentCheckIndex = 0;
 let items = [];
+let offlineCounter = 0;
+let fullSize = 0;
 
 $(document).ready(function () {
     checkSearch();
@@ -60,9 +62,12 @@ function checkSubmit() {
 
 function startCheckLinks()
 {
+    offlineCounter = 0;
+    fullSize = 0;
     $("#LinkGrid").html("");
     var savedName = localStorage.getItem("name");
     console.log(savedName + " - " + $("#Name").val());
+    $("#infoCount").html(links.length);
     items = [];
     if(savedName == $("#Name").val())
     {
@@ -78,12 +83,26 @@ function startCheckLinks()
     }
 }
 
+function getSize(size)
+{
+    let expos = [ "B", "KB", "MB", "GB" ];
+    let expo = 0;
+    while(size >= 1024)
+    {
+        expo++;
+        size = size / 1024;
+    }
+    return Math.round(size) + " " + expos[expo];
+}
+
 function checkRestore()
 {
     let perc = Math.round((100 / links.length) * currentCheckIndex);
     $("#progressbar").css("width", perc + "%");
     if(currentCheckIndex > parseInt(localStorage.getItem("currentCheckIndex")))
     {
+        $("#infoOffline").html(offlineCounter);
+        $("#infoSize").html(getSize(fullSize));
         checkLinks();
         return;
     }
@@ -108,14 +127,12 @@ function checkLinks() {
 
 function groupLinks() {
     let groups = {};
-    let offlineCounter = 0;
     let pattern1 = /\.part[0-9]+\.rar/;
     $("#LinkGrid").html("");
     Object.keys(items).forEach(key => {
         let name = items[key].name;
         if(!items[key].isOnline)
         {
-            offlineCounter++;
             items[key].name = items[key].id + " (Offline)";
             if(groups["Offline"] == undefined)
                 groups["Offline"] = {};
@@ -144,7 +161,7 @@ function groupLinks() {
             let ele = group[key2];
             ele.groupId = idCounter;
             console.log(ele);
-            $("#LinkGrid").append('<li id="' + ele.id + '" data-json"' + JSON.stringify(ele) + '" data-group="' + idCounter + '" class="collection-item avatar ' + (ele.isOnline ? 'online' : 'offline') + '"><i class="material-icons circle">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label class="checkbox"><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label><label class="button"><a class="waves-effect waves-light btn-small" data-id="' + ele.id + '"><i class="material-icons left">refresh</i>Reload</a></label></div></li>')
+            $("#LinkGrid").append('<li id="' + ele.id + '" data-json="' + JSON.stringify(ele) + '" data-group="' + idCounter + '" class="collection-item avatar ' + (ele.isOnline ? 'online' : 'offline') + '"><i class="material-icons circle">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label class="checkbox"><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label><label class="button"><a class="waves-effect waves-light btn-small" data-id="' + ele.id + '"><i class="material-icons left">refresh</i>Reload</a></label></div></li>')
         });
         idCounter++;
     });
@@ -190,9 +207,20 @@ var getInfoRetries = 0;
 function restoreInfoDDL(index)
 {
     var data = JSON.parse(localStorage.getItem(index));
+    if(data == null)
+    {
+        alert("Gespeicherte Daten konnten nicht geladen werden. Neustart");
+        localStorage.clear();
+        startCheckLinks();
+        return;
+    }
     items.push(data);
     console.log(data);
     currentCheckIndex++;
+    if(!data.isOnline)
+        offlineCounter++;
+    fullSize += data.size;
+    console.log(fullSize);
     checkRestore();
 }
 
@@ -234,22 +262,13 @@ function reloadInfoDDL(item)
 
 function getInfoDDL(url) {
     $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
-        let expos = [ "B", "KB", "MB", "GB" ];
-        let expo = 0;
-        let size = data.size;
-        while(size >= 1024)
-        {
-            expo++;
-            size = size / 1024;
-        }
-
         var item = {
             "index": currentCheckIndex,
             "id": data.id,
             "isOnline": data.isOnline,
             "name": data.name,
             "size": data.size,
-            "sizeRead": Math.round(size) + " " + expos[expo],
+            "sizeRead": getSize(data.size),
             "downloader": data.downloader,
             "url": data.url
         };
@@ -260,7 +279,14 @@ function getInfoDDL(url) {
         console.log(currentCheckIndex + "/" + links.length);
 
         if(!item.isOnline)
+        {
             $("#progressbar").addClass("red");
+            offlineCounter++;
+        }
+
+        fullSize += item.size;
+        $("#infoOffline").html(offlineCounter);
+        $("#infoSize").html(getSize(fullSize));
         
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
