@@ -69,6 +69,7 @@ function startCheckLinks()
     var savedName = localStorage.getItem("name");
     console.log(savedName + " - " + $("#Name").val());
     $("#infoCount").html(links.length);
+    $("#progressbar").removeClass("red");
     items = [];
     if(savedName == $("#Name").val())
     {
