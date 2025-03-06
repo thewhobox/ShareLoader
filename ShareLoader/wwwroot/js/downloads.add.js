@@ -130,11 +130,13 @@ function checkLinks() {
 function groupLinks() {
     let groups = {};
     let pattern1 = /\.part[0-9]+\.rar/;
+    offlineCounter = 0;
     $("#LinkGrid").html("");
     Object.keys(items).forEach(key => {
         let name = items[key].name;
         if(!items[key].isOnline)
         {
+            offlineCounter++;
             items[key].name = items[key].id + " (Offline)";
             if(groups["Offline"] == undefined)
                 groups["Offline"] = {};
@@ -193,10 +195,8 @@ function groupLinks() {
         $("li[data-group=" + group + "].collection-header input").prop('checked', totalCount == checkedCount);
     });
 
-    if(offlineCounter > 0)
-        alert("Es sind " + offlineCounter + " Dateien offline!");
     $("#submit").removeClass("disabled");
-
+    $("#infoOffline").html(offlineCounter);
     $("label.button a").click(e => {
         let id = $(e.currentTarget).attr("data-id");
         let item = items.find(x => x.id == id);
@@ -241,14 +241,14 @@ function reloadInfoDDL(item)
         console.log(item.index);
         localStorage.setItem(item.index, JSON.stringify(item));
 
-        var ele = $("#" + item.id);
-        ele.attr("data-json", JSON.stringify(item));
-        if(item.isOnline)
-            ele.removeClass("offline").addClass("online");
-        else
-            ele.removeClass("online").addClass("offline");
-        $("input[type=checkbox]", ele).prop("checked", item.isOnline);
-        $("span.title", ele).html(item.name);
+        // var ele = $("#" + item.id);
+        // ele.attr("data-json", JSON.stringify(item));
+        // if(item.isOnline)
+        //     ele.removeClass("offline").addClass("online");
+        // else
+        //     ele.removeClass("online").addClass("offline");
+        // $("input[type=checkbox]", ele).prop("checked", item.isOnline);
+        // $("span.title", ele).html(item.name);
 
         groupLinks();
     });
@@ -256,6 +256,7 @@ function reloadInfoDDL(item)
 
 function getInfoDDL(url) {
     $.getJSON(window.location.origin + "/Downloads/GetItemInfo/?url=" + encodeURIComponent(url), async function (data) {
+        console.log("success", data);
         var item = {
             "index": currentCheckIndex,
             "id": data.id,
@@ -285,6 +286,7 @@ function getInfoDDL(url) {
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
     }).fail(async function() {
+        console.log("error", url);
         offlineCounter++;
         $("#infoOffline").html(offlineCounter);
         $("#progressbar").addClass("red");
