@@ -94,7 +94,7 @@ function checkRestore()
 function checkLinks() {
     let perc = Math.round((100 / links.length) * currentCheckIndex);
     $("#progressbar").css("width", perc + "%");
-    if(currentCheckIndex == links.length)
+    if(currentCheckIndex >= links.length)
     {
         items.sort((a,b) => (a.name > b.name) ? 1 : ((b.name > a.name) ? -1 : 0))
         console.log(items);
@@ -258,6 +258,10 @@ function getInfoDDL(url) {
         localStorage.setItem(currentCheckIndex, JSON.stringify(item));
         currentCheckIndex++;
         console.log(currentCheckIndex + "/" + links.length);
+
+        if(!item.isOnline)
+            $("#progressbar").addClass("red");
+        
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
     }).fail(function() {
