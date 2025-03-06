@@ -83,7 +83,7 @@ public class DownloadChecker
 
         while(true)
         {
-            await Task.Delay(TimeSpan.FromSeconds(10));
+            await Task.Delay(TimeSpan.FromSeconds(1));
             SettingsModel settings = SettingsHelper.GetSetting<SettingsModel>("settings");
             if(settings == null || _currentItems.Count >= settings.MaxDownloads) continue;
 
