@@ -286,7 +286,23 @@ function getInfoDDL(url) {
         checkLinks();
     }).fail(async function() {
         offlineCounter++;
+        $("#infoOffline").html(offlineCounter);
         $("#progressbar").addClass("red");
+
+        var item = {
+            "index": currentCheckIndex,
+            "id": url,
+            "isOnline": false,
+            "name": "Offline",
+            "size": 0,
+            "sizeRead": "0 B",
+            "downloader": "",
+            "url": url
+        };
+        items.push(item);
+        localStorage.setItem("currentCheckIndex", currentCheckIndex);
+        localStorage.setItem(currentCheckIndex, JSON.stringify(item));
+
         await new Promise(r => setTimeout(r, 1000));
         checkLinks();
     });
