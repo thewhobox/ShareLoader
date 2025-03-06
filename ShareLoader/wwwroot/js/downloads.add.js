@@ -161,7 +161,7 @@ function groupLinks() {
             let ele = group[key2];
             ele.groupId = idCounter;
             console.log(ele);
-            $("#LinkGrid").append('<li id="' + ele.id + '" data-json="' + JSON.stringify(ele) + '" data-group="' + idCounter + '" class="collection-item avatar ' + (ele.isOnline ? 'online' : 'offline') + '"><i class="material-icons circle">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label class="checkbox"><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label><label class="button"><a class="waves-effect waves-light btn-small" data-id="' + ele.id + '"><i class="material-icons left">refresh</i>Reload</a></label></div></li>')
+            $("#LinkGrid").append('<li id="' + ele.id + '" data-json=\'' + JSON.stringify(ele) + '\' data-group="' + idCounter + '" class="collection-item avatar ' + (ele.isOnline ? 'online' : 'offline') + '"><i class="material-icons circle">insert_drive_file</i><span class="title">' + ele.name + '</span><p>' + ele.sizeRead + '</p><div class="secondary-content"><label class="checkbox"><input type="checkbox" ' + (ele.isOnline ? 'checked="checked"' : '') + ' /><span /></label><label class="button"><a class="waves-effect waves-light btn-small" data-id="' + ele.id + '"><i class="material-icons left">refresh</i>Reload</a></label></div></li>')
         });
         idCounter++;
     });
