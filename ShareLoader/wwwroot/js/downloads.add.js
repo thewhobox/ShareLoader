@@ -239,8 +239,8 @@ function reloadInfoDDL(item)
         }
 
         item.id = data.id;
-        item.isOnline = true; //data.isOnline;
-        item.name = "new name"; // data.name;
+        item.isOnline = data.isOnline;
+        item.name = data.name;
         item.size = data.size;
         item.sizeRead = Math.round(size) + " " + expos[expo];
         item.downloader = data.downloader;
